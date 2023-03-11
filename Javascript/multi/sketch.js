@@ -45,14 +45,6 @@ function draw() {
   // my.player.draw();
   my.player.update();
   
-  push();
-  stroke("red"); // x
-  line(-900,0,0,900,0,0);
-  stroke("blue"); // y
-  line(0,-900,0,0,900,0);
-  stroke("yellow"); // z
-  line(0,0,-900,0,0,900);
-  pop();
 
   cam.setPosition(
     my.player.x + cos(camYaw) * camDistance * cos(camPitch),
@@ -73,14 +65,25 @@ function draw() {
     // guest.player.draw();
   }
 
-
-
 }
 
 function drawInit() {
 
   pointLight(100,0,220,0,-600,0);
   ambientLight(255);
+  push();
+  rotateX(90);
+  plane(1800,1800);
+  pop();
+
+  push();
+  stroke("red"); // x
+  line(-900,0,0,900,0,0);
+  stroke("blue"); // y
+  line(0,-900,0,0,900,0);
+  stroke("yellow"); // z
+  line(0,0,-900,0,0,900);
+  pop();
 
 }
 
@@ -138,6 +141,21 @@ class Crewmate {
 
   update() {
 
+
+
+    if (this.y <= 0) {
+      this.dy += 0.15;
+    } 
+    else {
+      while (this.y > 0) {
+        this.y -= 0.1;
+      }
+      this.y = 0;
+      if (keyIsDown(32)) {
+        this.dy = -5;
+      }
+    }
+  
     // 87 = W
     // 65 = A
     // 83 = S
@@ -170,9 +188,12 @@ class Crewmate {
       this.dx = this.dx * 0.9
       this.dz = this.dz * 0.9
     }
-  
+
+
+
     this.x += this.dx;
     this.z += this.dz;
+    this.y += this.dy;
     this.dir = atan2(this.dx,this.dz);
     
   }
