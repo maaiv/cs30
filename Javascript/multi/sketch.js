@@ -10,9 +10,7 @@ let camYaw = 0; //x
 let camPitch = 0; //y
 let camDistance = 300;
 let things = [{type: 'box', x: 300, z: 0, width: 100}, {type: 'box', x: 300, z: 600, width: 300},{type: 'box', x: -300, z: -1200, width: 800}];
-
-
-let pointerLocked = false;
+let lightpos = [];
 
 
 
@@ -20,57 +18,62 @@ window.preload = () => {
   partyConnect("wss://demoserver.p5party.org", "among");
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
+  shared = partyLoadShared("shared");
 };
 
 function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
-  cam = createCamera();
   angleMode(DEGREES);
   colorMode(HSB, 255);
+
+  cam = createCamera();
   my.player = new Crewmate(0,0,0,0,0);
+  collideVisualCanvas = createGraphics(180,180);
+  shared.messages = [];
 
   console.log("me", JSON.stringify(my));
   console.log("guests", JSON.stringify(guests));
   console.log("am i host?", partyIsHost());
-
-  collideVisualCanvas = createGraphics(180,180);
   }
 
 function draw() {
-
+  background(20);
+  //get pointerlock
   if (mouseIsPressed) {
     requestPointerLock();
   }
 
-  background(20);
+
+
+
   drawInit();
   collideVisual();
-
+  lightpos = [];
   for (let guest of guests) {
-    spotLight(
-      0,0,255,
-      guest.player.x,-400,guest.player.z,
-      0,1,0,
-      75,5);
+    if (guest.player.hold === 0) {
+      spotLight(
+        0,0,255,
+        guest.player.x,-400,guest.player.z,
+        0,1,0,
+        85,4);
+      lightpos.push([guest.player.x,guest.player.z]);
+    }
   }
-
 
   for (let guest of guests) {
     push();
-    ambientLight(105);
+    let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
+    ambientLight(map(minimumDistance,0,600,105,10,true));
     drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h)
     pop();
   }
   push();
-    ambientLight(105);
+    let minimumDistance = min(lightpos.map(v => dist(0,0,v[0], v[1])));
+    ambientLight(map(minimumDistance,0,600,105,10,true));
     drawCrewMate(0,0,0,frameCount,180);
   pop();
 
   // my.player.draw();
-
-
-
-
 
   push();
   rotateX(90);
@@ -102,13 +105,15 @@ function draw() {
 
   cam.lookAt(my.player.x,my.player.y,my.player.z);
 
-
-
 }
 
 
-
 function drawInit() {
+  pointLight(
+    0,0,0,
+    0,-300,0
+  );
+
 
   push();
   stroke("red"); // x
@@ -118,7 +123,7 @@ function drawInit() {
   stroke("yellow"); // z
   line(0,0,-900,0,0,900);
   pop();
-
+  
 }
 
 function drawCrewMate(x,y,z,dir,h) {
@@ -216,9 +221,20 @@ class Crewmate {
     this.dy = 0;
     this.dz = 0;
     this.h = h
+    this.hold = 1;
   }
 
   update() {
+
+
+    if (mouseIsPressed) {
+      this.hold = 0;
+    }
+    else {
+      this.hold = 1;
+    }
+    
+
     if (this.y <= 0) {
       this.dy += 0.15;
     } 
@@ -232,6 +248,8 @@ class Crewmate {
       }
     }
   
+
+
     // 87 = W
     // 65 = A
     // 83 = S
@@ -286,6 +304,7 @@ class Crewmate {
     }
     this.y += this.dy;
     this.dir = atan2(this.dx,this.dz);
+    
     
 
 
