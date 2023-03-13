@@ -27,7 +27,7 @@ function setup() {
   cam = createCamera();
   angleMode(DEGREES);
   colorMode(HSB, 255);
-  my.player = new Crewmate(0,0,0,0);
+  my.player = new Crewmate(0,0,0,0,);
 
   console.log("me", JSON.stringify(my));
   console.log("guests", JSON.stringify(guests));
@@ -58,7 +58,7 @@ function draw() {
   for (let guest of guests) {
     push();
     ambientLight(105);
-    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,0)
+    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h)
     pop();
   }
   push();
@@ -129,7 +129,7 @@ function drawCrewMate(x,y,z,dir,h) {
     ambientMaterial(h, 255, 255);
 
     strokeWeight(0.3);
-    translate(x,y-35,z);
+    translate(x,y-36,z);
     rotateY(dir);
 
     ellipsoid(25,30,20);
@@ -139,7 +139,7 @@ function drawCrewMate(x,y,z,dir,h) {
       shininess(40);
       ambientMaterial(0, 0, 60);
 
-      translate(0,-10,15);
+      translate(0,-10,14);
       ellipsoid(15,10,13);
     pop();
 
@@ -207,7 +207,7 @@ function collideVisual() {
 }
 
 class Crewmate {
-  constructor(x, y, z, dir) {
+  constructor(x, y, z, dir, h) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -215,6 +215,7 @@ class Crewmate {
     this.dx = 0;
     this.dy = 0;
     this.dz = 0;
+    this.h = h
   }
 
   update() {
