@@ -6,10 +6,14 @@
 // - describe what you did to take this project "above and beyond"
 
 
-camYaw = 0; //x
-camPitch = 0; //y
-camDistance = 300;
-pointerLocked = false;
+let camYaw = 0; //x
+let camPitch = 0; //y
+let camDistance = 300;
+let things = [{type: 'box', x: 300, z: 0, width: 100}, {type: 'box', x: 300, z: 600, width: 300},{type: 'box', x: -300, z: -1200, width: 800}];
+
+
+let pointerLocked = false;
+
 
 
 window.preload = () => {
@@ -29,20 +33,61 @@ function setup() {
   console.log("guests", JSON.stringify(guests));
   console.log("am i host?", partyIsHost());
 
-}
+  collideVisualCanvas = createGraphics(180,180);
+  }
 
 function draw() {
-
 
   if (mouseIsPressed) {
     requestPointerLock();
   }
 
-
   background(20);
   drawInit();
-  drawCrewMate(0,0,0,frameCount);
+  collideVisual();
+
+  for (let guest of guests) {
+    spotLight(
+      0,0,255,
+      guest.player.x,-400,guest.player.z,
+      0,1,0,
+      75,5);
+  }
+
+
+  for (let guest of guests) {
+    push();
+    ambientLight(105);
+    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,0)
+    pop();
+  }
+  push();
+    ambientLight(105);
+    drawCrewMate(0,0,0,frameCount,180);
+  pop();
+
   // my.player.draw();
+
+
+
+
+
+  push();
+  rotateX(90);
+  plane(1800,1800);
+  pop();
+
+  for (let thing of things) {
+    push();
+    translate(thing.x,0,thing.z);
+    if (thing.type === 'box') {
+      box(thing.width,1000,thing.width)
+    }
+    pop();
+  }
+
+
+  
   my.player.update();
   
 
@@ -56,25 +101,14 @@ function draw() {
   camPitch -= movedY/10;
 
   cam.lookAt(my.player.x,my.player.y,my.player.z);
-  for (let guest of guests) {
 
-    push();
-    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir)
-    pop();
 
-    // guest.player.draw();
-  }
 
 }
 
-function drawInit() {
 
-  pointLight(100,0,220,0,-600,0);
-  ambientLight(255);
-  push();
-  rotateX(90);
-  plane(1800,1800);
-  pop();
+
+function drawInit() {
 
   push();
   stroke("red"); // x
@@ -87,16 +121,17 @@ function drawInit() {
 
 }
 
-function drawCrewMate(x,y,z,dir) {
+function drawCrewMate(x,y,z,dir,h) {
   push();
     noStroke();
-    // specularMaterial(25);
-    // shininess(1000);
-    ambientMaterial(0, 255, 120);
+    specularMaterial(25);
+    shininess(10000);
+    ambientMaterial(h, 255, 255);
 
     strokeWeight(0.3);
     translate(x,y-35,z);
     rotateY(dir);
+
     ellipsoid(25,30,20);
 
     push();
@@ -128,6 +163,49 @@ function drawCrewMate(x,y,z,dir) {
 
 }
 
+function checkCollisions(playerX,playerZ) {
+  for (let thing of things) {
+    if (thing.type === 'box') {
+      if (collideRectCircle(
+        thing.x - thing.width/2, 
+        thing.z - thing.width/2,
+        thing.width,
+        thing.width,
+        playerX,
+        playerZ,
+        60
+      )) {
+        return(true);
+      }
+    }
+  
+
+  }
+  return(false);
+}
+
+function collideVisual() {
+  collideVisualCanvas.background(255);
+  for (let guest of guests) {
+
+    collideVisualCanvas.circle(guest.player.x/10 + 90,guest.player.z/10 + 90, 6);
+  }
+  for (let thing of things) {
+    push();
+    if (thing.type === 'box') {
+      let boxMiniX = (thing.x - thing.width/2)/10 + 90
+      let boxMiniZ = (thing.z - thing.width/2)/10 + 90
+      collideVisualCanvas.square(boxMiniX, boxMiniZ, thing.width/10);
+    }
+    pop();
+  }
+  push();
+  translate(my.player.x - 50,my.player.y-200,my.player.z)
+  image(collideVisualCanvas,0,0,100,100);
+  pop();
+
+}
+
 class Crewmate {
   constructor(x, y, z, dir) {
     this.x = x;
@@ -140,9 +218,6 @@ class Crewmate {
   }
 
   update() {
-
-
-
     if (this.y <= 0) {
       this.dy += 0.15;
     } 
@@ -175,6 +250,7 @@ class Crewmate {
      
 
       this.dx -= 1 * sin(dir - camYaw);
+
       this.dz -= 1 * cos(dir - camYaw);
 
       if (Math.sqrt(this.dx**2 + this.dz**2) > 6) {
@@ -192,10 +268,26 @@ class Crewmate {
 
 
     this.x += this.dx;
+    if (checkCollisions(this.x,this.z)) {
+      while (checkCollisions(this.x,this.z)) {
+        this.x -= this.dx/100;
+      }
+      this.dx = 0;
+      
+    }
     this.z += this.dz;
+    if (checkCollisions(this.x,this.z)) {
+      while (checkCollisions(this.x,this.z)) {
+        this.z -= this.dz/100;
+      }
+      this.dz = 0;
+      
+    }
     this.y += this.dy;
     this.dir = atan2(this.dx,this.dz);
     
+
+
   }
   draw() {
     push();
