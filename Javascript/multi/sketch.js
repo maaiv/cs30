@@ -27,7 +27,7 @@ function setup() {
   cam = createCamera();
   angleMode(DEGREES);
   colorMode(HSB, 255);
-  my.player = new Crewmate(0,0,0,0,);
+  my.player = new Crewmate(0,0,0,0,0);
 
   console.log("me", JSON.stringify(my));
   console.log("guests", JSON.stringify(guests));
