@@ -4,14 +4,55 @@
 //
 // Extra for Experts:
 // - describe what you did to take this project "above and beyond"
-
+// lol
+// Checklist:
+// 1. add make collisions work in all directions in the 2d plane
+//    - probably just recode my normal finder thingy from scratch
+// 2. add proper UI
+//    - main menu last
+//    - selected item
+//    - global chat bruh fml
+//    - name tags?
+//    - working minimap idk
+//      - would that give too much power?
+// 3. add method to kill crewmate
+//    - add ragdoll physics maybe
+//    - change sprite
+//    - impostor class
+//    - create red outline
+//    - I need to learn blender
+// 4. add true 3d collisions (maybe?)
+//    - not gonna work with the current lighting system
+//    - tbh I just wanna make this to see if I can
+//    - funny parkour challenge
+//    - assign y/height value to objects
+//    - if collide, check y intersection
+// 5. add SFX
+//    - bg music
+//    - kill sfx funny
+//    - among us trap remix
+//    - walking sfx
+// 6. spruce up guest movement
+//    - add velocity variables to shared (gravity too maybe)
+//    - move figure in between server updates
+// 7. clean up code
+//    - I am sorry mr schellenberg
+// 8. first person (maybe?)
+//    - adjust camera position
+//    - introduce flashlight lighting???
+//    - better immesion
+// 9. add ranged weaponary
+//    - probably that one gun thing
+//    - allows impostors to kill from afar, but gives away position through sound 
+// 10. venting (maybe?)
+//    - either classic fast travel or hidden passageways only accessable to the impostor
 
 let camYaw = 0; //x
 let camPitch = 0; //y
 let camDistance = 300;
 let things = [{type: 'box', x: 300, z: 0, width: 100}, {type: 'box', x: 300, z: 600, width: 300},{type: 'box', x: -300, z: -1200, width: 800}];
 let lightpos = [];
-let lightSize = 5;
+let lightSize = 10;
 
 
 window.preload = () => {
@@ -140,9 +181,9 @@ function drawCrewMate(x,y,z,dir,h,hold) {
     ellipsoid(25,30,20);
 
     push();
-      specularMaterial(200);
-      shininess(40);
-      ambientMaterial(0, 0, 60);
+      specularMaterial(300);
+      shininess(20);
+      ambientMaterial(0,0,0);
 
       translate(0,-10,14);
       ellipsoid(15,10,13);
