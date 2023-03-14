@@ -11,7 +11,7 @@ let camPitch = 0; //y
 let camDistance = 300;
 let things = [{type: 'box', x: 300, z: 0, width: 100}, {type: 'box', x: 300, z: 600, width: 300},{type: 'box', x: -300, z: -1200, width: 800}];
 let lightpos = [];
-
+let lightSize = 5;
 
 
 window.preload = () => {
@@ -37,7 +37,7 @@ function setup() {
   }
 
 function draw() {
-  background(20);
+  background(5);
   //get pointerlock
   if (mouseIsPressed) {
     requestPointerLock();
@@ -50,12 +50,12 @@ function draw() {
   collideVisual();
   lightpos = [];
   for (let guest of guests) {
-    if (guest.player.hold === 0) {
+    if (guest.player.hold === 1) {
       spotLight(
         0,0,255,
         guest.player.x,-400,guest.player.z,
         0,1,0,
-        85,4);
+        85,40/lightSize);
       lightpos.push([guest.player.x,guest.player.z]);
     }
   }
@@ -63,14 +63,14 @@ function draw() {
   for (let guest of guests) {
     push();
     let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
-    ambientLight(map(minimumDistance,0,600,105,10,true));
-    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h)
+    ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
+    drawCrewMate(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold)
     pop();
   }
   push();
     let minimumDistance = min(lightpos.map(v => dist(0,0,v[0], v[1])));
-    ambientLight(map(minimumDistance,0,600,105,10,true));
-    drawCrewMate(0,0,0,frameCount,180);
+    ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
+    drawCrewMate(0,0,0,frameCount,180,2);
   pop();
 
   // my.player.draw();
@@ -126,7 +126,7 @@ function drawInit() {
   
 }
 
-function drawCrewMate(x,y,z,dir,h) {
+function drawCrewMate(x,y,z,dir,h,hold) {
   push();
     noStroke();
     specularMaterial(25);
@@ -159,11 +159,26 @@ function drawCrewMate(x,y,z,dir,h) {
       translate(0,0,-18);
       box(24,35,8);
     pop();
+
+
+  if (hold === 2) {
+    push();
+      ambientMaterial(0,120,255);
+      translate(16,8,15);
+      rotateY(-90);
+
+      box(20,6,2)
+      translate(22,0,0);
+      rotateZ(-90);
+
+      ambientMaterial(0,120,60);
+      scale(1,1,0.3)
+      cone(8,30,5,0);
+      pop();
+  }
   pop();
 
-  push();
-    
-  pop();
+
 
 
 }
@@ -226,13 +241,16 @@ class Crewmate {
 
   update() {
 
-
-    if (mouseIsPressed) {
+    if (keyIsDown(49)) {
       this.hold = 0;
     }
-    else {
+    else if (keyIsDown(50)) {
       this.hold = 1;
     }
+    else if (keyIsDown(51)) {
+      this.hold = 2
+    }
+
     
 
     if (this.y <= 0) {
