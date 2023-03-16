@@ -45,7 +45,7 @@ function setup() {
 
 
 function draw() {
-  background(0,0,0); // try removing this line and see what happens!
+  background(0,0,0,30); // try removing this line and see what happens!
   
   push();
   fill("white")
