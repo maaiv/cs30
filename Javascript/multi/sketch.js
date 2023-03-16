@@ -219,6 +219,9 @@ function drawCrewMate(x,y,z,dir,h,hold) {
   }
   pop();
 
+
+
+
 }
 
 function checkCollisions(playerX,playerZ) {
@@ -273,12 +276,12 @@ class Crewmate {
     this.dx = 0;
     this.dy = 0;
     this.dz = 0;
-    this.h = h;
+    this.h = h
     this.hold = 1;
   }
 
   update() {
-    this.h = (this.h + 1) % 255;
+
     if (keyIsDown(49)) {
       this.hold = 0;
     }
@@ -296,14 +299,14 @@ class Crewmate {
     } 
     else {
       while (this.y > 0) {
-        this.y -= -0.1;
+        this.y -= 0.1;
       }
       this.y = 0;
       if (keyIsDown(32)) {
         this.dy = -5;
       }
     }
-
+  
 
 
     // 87 = W
