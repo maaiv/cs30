@@ -6,7 +6,7 @@
 // - describe what you did to take this project "above and beyond"
 // lol
 // Checklist:
-// 1. add make collisions work in all directions in the 2d plane
+// 1. add make collisions work in all directions in the 2d plane || DONE took way too long
 //    - probably just recode my normal finder thingy from scratch
 // 2. add proper UI
 //    - main menu last
@@ -61,17 +61,26 @@ let playerDeceleration = 0.9;
 
 // Create environment objects
 let terrain = [
-  {type: 'box', x: 300, z: 0, width: 100}, 
-  {type: 'box', x: 300, z: 600, width: 300},
-  {type: 'box', x: -300, z: -1200, width: 800}
+  {type: 'box', x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
+  {type: 'box', x: 300, y: -30, z: 0, width: 100, height: 60, length: 100}, 
+  {type: 'box', x: 450, y: -110, z: 0, width: 100, height: 60, length: 100}, 
+  {type: 'box', x: 300, y: -30, z: 400, width: 300, height: 60, length: 300},
+  {type: 'box', x: -300, y: -30, z: -600, width: 800, height: 60, length: 800},
+  {type: 'cylinder', x: -300, y: -30, z: 400, radius: 100, height: 60},
+  {type: 'cylinder', x: 000, y: -350, z: 1500, radius: 200, height: 700}
 ];
+
+
+for (let i = 1; i < 10; i += 1) {
+  terrain.push({type: 'box', x: 450, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
+}
 
 // Connect to the server and shared data
 function preload() {
   partyConnect("wss://demoserver.p5party.org", "among");
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
-  shared = partyLoadShared("shared");
+  shared = partyLoadShared("shared", {ambientLevel: 155});
 };
 
 // Set sketch modes, canvas, and 
@@ -125,6 +134,12 @@ function drawInit() {
     0,0,0,
     0,-300,0
   );
+  pointLight(
+    0,0,shared.ambientLevel,
+    0,-1900,0
+  );
+
+  ambientLight(shared.ambientLevel/2);
 
   if (mouseIsPressed) {
     requestPointerLock();
@@ -138,26 +153,35 @@ function collideVisual() {
   if (debugState) {
     collideVisualCanvas.background(255);
 
-    // draw character hitboxes
-    for (let guest of guests) {
-      collideVisualCanvas.circle(guest.player.x/10 + 90,guest.player.z/10 + 90, 6);
-    }
 
     // draw environment hitboxes
     for (let terrainObject of terrain) {
       push();
         if (terrainObject.type === 'box') {
-          let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90
-          let boxMiniZ = (terrainObject.z - terrainObject.width/2)/10 + 90
-          collideVisualCanvas.square(boxMiniX, boxMiniZ, terrainObject.width/10);
+          let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90;
+          let boxMiniZ = (terrainObject.z - terrainObject.length/2)/10 + 90;
+          collideVisualCanvas.rect(boxMiniX, boxMiniZ, terrainObject.width/10, terrainObject.length/10);
+        }
+        if (terrainObject.type === 'cylinder') {
+          let cylinderMiniX = terrainObject.x/10 + 90;
+          let cylinderMiniZ = terrainObject.z/10 + 90;
+          collideVisualCanvas.circle(cylinderMiniX,cylinderMiniZ,terrainObject.radius/5);
         }
       pop();
     }
 
+    // draw character hitboxes
+    for (let guest of guests) {
+      collideVisualCanvas.circle(guest.player.x/10 + 90,guest.player.z/10 + 90, 6);
+      collideVisualCanvas.circle(guest.player.x/10 + 90 + sin(guest.player.dir) * 3, guest.player.z/10 + 90 + cos(guest.player.dir) * 3, 2)
+
+    }
+
     //draw visualizer above the player model
     push();
-      translate(my.player.x - 50,my.player.y-200,my.player.z)
+      translate(my.player.x - 50,my.player.y-65 - 100,my.player.z)
       image(collideVisualCanvas,0,0,100,100);
+
     pop();
   }
 }
@@ -188,7 +212,7 @@ function createLights() {
     if (guest.player.hold === 1) {
       spotLight(
         0,0,255,
-        guest.player.x,-400,guest.player.z,
+        guest.player.x,guest.player.y - 400,guest.player.z,
         0,1,0,
         85,40/lightSize);
       lightpos.push([guest.player.x,guest.player.z]);
@@ -278,16 +302,19 @@ function drawCrewMateModel(x,y,z,dir,h,hold) {
 
 // Draw terrain
 function drawEnvironment() {
-  push();
-    rotateX(90);
-    plane(1800,1800);
-  pop();
+  // push();
+  //   rotateX(90);
+  //   plane(1800,1800);
+  // pop();
 
   for (let terrainObject of terrain) {
     push();
-      translate(terrainObject.x,0,terrainObject.z);
+      translate(terrainObject.x,terrainObject.y,terrainObject.z);
       if (terrainObject.type === 'box') {
-        box(terrainObject.width,1000,terrainObject.width)
+        box(terrainObject.width,terrainObject.height,terrainObject.length);
+      }
+      else if (terrainObject.type === 'cylinder') {
+        cylinder(terrainObject.radius,terrainObject.height);
       }
     pop();
   }
@@ -305,27 +332,95 @@ function drawEnvironment() {
   }
 }
 
-function checkCollisions(playerX,playerZ) {
-
-
-
-  for (let terrainObject of terrain) {
-    if (terrainObject.type === 'box') {
-      if (collideRectCircle(
-        terrainObject.x - terrainObject.width/2, 
-        terrainObject.z - terrainObject.width/2,
-        terrainObject.width,
-        terrainObject.width,
-        playerX,
-        playerZ,
-        60
-      )) {
+function checkCollisions(playerX,playerY,playerZ,terrainObject) {
+  if (terrainObject.type === 'box') {
+    if (collideRectCircle(
+      terrainObject.x - terrainObject.width/2, 
+      terrainObject.z - terrainObject.length/2,
+      terrainObject.width,
+      terrainObject.length,
+      playerX,
+      playerZ,
+      60
+    )) {
+      if (playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2) {
         return(true);
       }
     }
   }
-  return(false);
+  else if (terrainObject.type === 'cylinder') {
+    if (collideCircleCircle(
+      terrainObject.x,
+      terrainObject.z,
+      terrainObject.radius * 2,
+      playerX,
+      playerZ,
+      60
+    )) {
+      if (playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2) {
+        return(true);
+      }
+    }
+  }
+return(false);
 }
+
+
+
+
+function findNormal(playerX,playerZ,playerDir,terrainObject) {
+  if (terrainObject.type === 'box') {
+    var normalCollide = (x, z, dir, terrainObject) => collidePointRect(
+      x + sin(dir) * 40,
+      z + cos(dir) * 40,
+      terrainObject.x - terrainObject.width/2, 
+      terrainObject.z - terrainObject.length/2,
+      terrainObject.width,
+      terrainObject.length,
+    );
+  }
+  else if (terrainObject.type === 'cylinder') {
+    var normalCollide = (x, z, dir, terrainObject) => collidePointCircle(
+      x + sin(dir) * 40,
+      z + cos(dir) * 40,
+      terrainObject.x, 
+      terrainObject.z,
+      terrainObject.radius * 2,
+    );
+  }
+
+  let tempDir = playerDir;
+  let dir1;
+  let dir2;
+  if (normalCollide(playerX,playerZ,tempDir,terrainObject)) {
+    while (normalCollide(playerX,playerZ,tempDir,terrainObject)) {
+      tempDir += 1;
+    }
+
+    dir1 = tempDir;
+    tempDir = playerDir;
+    while (normalCollide(playerX,playerZ,tempDir,terrainObject)) {
+      tempDir -= 1;
+    }
+    dir2 = tempDir;
+    }
+
+  else {
+    while (!normalCollide(playerX,playerZ,tempDir,terrainObject)) {
+      tempDir += 1;
+    }
+  
+    dir1 = tempDir;
+    tempDir = playerDir;
+    while (!normalCollide(playerX,playerZ,tempDir,terrainObject)) {
+      tempDir -= 1;
+    }
+    dir2 = tempDir + 360;
+  }
+
+  return(round((dir1 + dir2)/2,2));
+}
+
 
 // Crewmate class for holding data and taking user input
 class Crewmate {
@@ -356,40 +451,52 @@ class Crewmate {
 
     // apply x velocity and check collisions
     this.x += this.dx;
-    if (checkCollisions(this.x,this.z)) {
-      while (checkCollisions(this.x,this.z)) {
-        this.x -= this.dx/100;
-      }
-      this.dx = 0;
-    }
-
-    // apply z velocity and check collisions
     this.z += this.dz;
-    if (checkCollisions(this.x,this.z)) {
-      while (checkCollisions(this.x,this.z)) {
-        this.z -= this.dz/100;
+
+    for (let terrainObject of terrain) {
+      if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+        let n = findNormal(this.x, this.z, this.dir, terrainObject);
+        while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
+          this.x -= sin(n);
+          this.z -= cos(n);
+        }
       }
-      this.dz = 0;
     }
 
-    // apply y velocity and point in direction of motion
-    this.y += this.dy;
+    // point in direction of motion
     this.dir = atan2(this.dx,this.dz);
 
-    //check vertical collisions
-    if (this.y < 0) {
-      this.dy += 0.15;
-    } 
-    else {
-      while (this.y > 0) {
-        this.y -= 0.1;
-      }
-      this.y = 0;
-  
-      if (keyIsDown(32)) {
-        this.dy = -5;
-      }
+    // apply y velocity and check collisions
+    this.y += this.dy;
+
+    let touchingGround = false;
+
+    for (let terrainObject of terrain) {
+      if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+        if (this.dy >= 0) {
+          while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+            this.y -= 0.1;
+          }
+          this.dy = 0;
+          if (keyIsDown(32)) {
+            this.dy = -5;
+          }
+          
+        }
+        else if (this.dy < 0) {
+          while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+            this.y += 0.1;
+          }
+          this.dy = 0;
+        }
+        touchingGround = true;
+      } 
     }
+
+    if (!touchingGround) {
+      this.dy += 0.15;
+    }
+
 
 
     // detect keyboard input
@@ -429,6 +536,6 @@ class Crewmate {
       this.dx = this.dx * playerDeceleration
       this.dz = this.dz * playerDeceleration
     }
-    
+    shared.ambientLevel += keyIsDown(UP_ARROW) - keyIsDown(DOWN_ARROW);
   }
 }
