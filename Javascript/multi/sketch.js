@@ -15,7 +15,7 @@
 //    - name tags?
 //    - working minimap idk
 //      - would that give too much power?
-// 3. add method to kill crewmate
+// 3. add method to kill crewmate || DONE
 //    - add ragdoll physics maybe
 //    - change sprite
 //    - impostor class
@@ -57,7 +57,8 @@ let lightSize = 10;
 
 let playerAcceleration = 1;
 let playerDeceleration = 0.9;
-
+let maxVelocity = 6;
+  
 
 // Create environment objects
 let terrain = [
@@ -195,15 +196,29 @@ function updateMyPlayer() {
 
 // Move camera
 function updateCam() {
-  cam.setPosition(
-    my.player.x + cos(camYaw) * camDistance * cos(camPitch),
-    my.player.y - 60 + sin(camPitch) * camDistance,
-    my.player.z + sin(camYaw) * camDistance * cos(camPitch),
-    );
-  camYaw += movedX/10;
-  camPitch -= movedY/10;
 
-  cam.lookAt(my.player.x,my.player.y,my.player.z);
+  if (my.player.perspective === 3) {
+    cam.setPosition(
+      my.player.x + cos(camYaw) * camDistance * cos(camPitch),
+      my.player.y - 60 + sin(camPitch) * camDistance,
+      my.player.z + sin(camYaw) * camDistance * cos(camPitch),
+      );
+    camYaw += movedX/10;
+    camPitch -= movedY/10;
+  
+    cam.lookAt(my.player.x,my.player.y - 60,my.player.z);
+  }
+  else if (my.player.perspective === 1) {
+    cam.setPosition(
+      my.player.x + cos(camYaw) * 1 * cos(camPitch),
+      my.player.y - 60 + sin(camPitch) * 1,
+      my.player.z + sin(camYaw) * 1 * cos(camPitch),
+      );
+    camYaw += movedX/10;
+    camPitch -= movedY/10;
+
+    cam.lookAt(my.player.x,my.player.y - 60,my.player.z);
+    }
 }
 
 // Create and store position of each player light
@@ -227,12 +242,14 @@ function createLights() {
 // Calculate ambient lighting and draw player models
 function drawPlayers() {
   for (let guest of guests) {
-    push();
-      // calculate ambient lighting depending on the closest distance to another light before rendering
-      let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
-      ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
-      drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold,guest.player.alive)
-    pop();
+    if (guest.player != my.player || my.player.perspective === 3) {
+      push();
+        // calculate ambient lighting depending on the closest distance to another light before rendering
+        let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
+        ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
+        drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold,guest.player.alive)
+      pop();
+    }
   }
 
   // draw demo player model if in debug mode
@@ -344,10 +361,6 @@ function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
 
 // Draw terrain
 function drawEnvironment() {
-  // push();
-  //   rotateX(90);
-  //   plane(1800,1800);
-  // pop();
 
   for (let terrainObject of terrain) {
     push();
@@ -495,6 +508,7 @@ class Crewmate {
     this.hold = 1;
     this.alive = true;
     this.id = noise(random(1,10));
+    this.perspective = 3;
   }
 
   update() {
@@ -530,6 +544,7 @@ class Crewmate {
         }
       }
 
+
       // apply x velocity and check collisions
       this.x += this.dx;
       this.z += this.dz;
@@ -545,7 +560,13 @@ class Crewmate {
       }
 
       // point in direction of motion
-      this.dir = atan2(this.dx,this.dz);
+
+      if (this.perspective === 3) {
+        this.dir = atan2(this.dx,this.dz);
+      }
+      else if (this.perspective === 1) {
+        this.dir = -camYaw - 90;
+      }
 
       // apply y velocity and check collisions
       this.y += this.dy;
@@ -604,8 +625,8 @@ class Crewmate {
         this.dz -= playerAcceleration * cos(dir - camYaw);
 
         // cap player velocity
-        if (Math.sqrt(this.dx**2 + this.dz**2) > 6) {
-          let ratio = 6/Math.sqrt(this.dx**2 + this.dz**2);
+        if (Math.sqrt(this.dx**2 + this.dz**2) > maxVelocity) {
+          let ratio = maxVelocity/Math.sqrt(this.dx**2 + this.dz**2);
           this.dx = lerp(0,this.dx,ratio);
           this.dz = lerp(0,this.dz,ratio);
         }
