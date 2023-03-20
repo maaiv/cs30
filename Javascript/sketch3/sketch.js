@@ -21,10 +21,7 @@ function setup() {
 
 function draw() {
   background(255);
-  for (let i = frameCount * 5; i < width + frameCount * 5; i++) {
-    rect(terrain[i].x - frameCount * 5, height - terrain[i].height, 1, terrain[i].height);
 
-  }
 }
 
 function spawnRectangles() {

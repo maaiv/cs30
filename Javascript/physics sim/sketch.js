@@ -36,10 +36,10 @@ function setup() {
   negative.collider = "d";
   negative.color = color(0,0,255);
 
-  ball = new positive.Sprite(500+50, height/2+200);
-  ball.vel.y = -3 - 1;
-  ball = new negative.Sprite(500-50, height/2 + 200); 
-  ball.vel.y = 3 - 1;
+  ball = new positive.Sprite(width/2, height/2 + 50);
+  ball.vel.y = 0;
+  ball = new negative.Sprite(width/2, height/2); 
+  ball.vel.y = 0;
 }
 
 
