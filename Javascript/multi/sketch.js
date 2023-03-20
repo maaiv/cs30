@@ -466,6 +466,7 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
 function die(data) {
   console.log(my.player.id, data.id)
   if (data.id === my.player.id) {
+    killSFX.play();
     
     console.log('bruh');
     my.player.alive = false;
