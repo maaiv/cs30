@@ -54,7 +54,7 @@ let camPitch = 0; //y
 let camDistance = 300;
 let lightpos = [];
 let lightSize = 10;
-let debugState = true;
+
 let playerAcceleration = 1;
 let playerDeceleration = 0.9;
 
@@ -80,7 +80,7 @@ function preload() {
   partyConnect("wss://demoserver.p5party.org", "among");
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
-  shared = partyLoadShared("shared", {ambientLevel: 155});
+  shared = partyLoadShared("shared", {ambientLevel: 0, debugState: false});
   killSFX = loadSound('assets/killSFX.mp3');
 };
 
@@ -152,7 +152,7 @@ function drawInit() {
 
 // Creates a visualizer for the different hitboxes and colliders above the player if in debug mode
 function collideVisual() {
-  if (debugState) {
+  if (shared.debugState) {
     collideVisualCanvas.background(255);
 
 
@@ -236,7 +236,7 @@ function drawPlayers() {
   }
 
   // draw demo player model if in debug mode
-  if (debugState) {
+  if (shared.debugState) {
     push();
       let minimumDistance = min(lightpos.map(v => dist(0,0,v[0], v[1])));
       ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
@@ -362,7 +362,7 @@ function drawEnvironment() {
   }
 
   // create axes if in debug mode
-  if (debugState) {
+  if (shared.debugState) {
     push();
       stroke("red"); // x
       line(-900,0,0,900,0,0);
@@ -406,8 +406,6 @@ function checkCollisions(playerX,playerY,playerZ,terrainObject) {
   }
 return(false);
 }
-
-
 
 
 function findNormal(playerX,playerZ,playerDir,terrainObject) {
@@ -477,7 +475,11 @@ function die(data) {
   }
 }
 
-
+function keyPressed() {
+  if (keyCode === 80) {
+    shared.debugState = !shared.debugState;
+  } 
+}
 
 // Crewmate class for holding data and taking user input
 class Crewmate {
