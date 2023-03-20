@@ -130,7 +130,7 @@ function draw() {
 
 // Set background and pointer lock
 function drawInit() {
-  background(5);
+  background(0);
  
   // create a weak light so WEBGL doesn't just break when there are no lights
   pointLight(
