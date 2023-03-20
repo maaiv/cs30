@@ -21,7 +21,7 @@
 //    - impostor class
 //    - create red outline
 //    - I need to learn blender
-// 4. add true 3d collisions (maybe?)
+// 4. add true 3d collisions (maybe?) || DONE
 //    - not gonna work with the current lighting system
 //    - tbh I just wanna make this to see if I can
 //    - funny parkour challenge
@@ -81,6 +81,7 @@ function preload() {
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {ambientLevel: 155});
+  killSFX = loadSound('assets/killSFX.mp3');
 };
 
 // Set sketch modes, canvas, and 
@@ -89,6 +90,7 @@ function setup() {
   angleMode(DEGREES);
   colorMode(HSB, 255);
   cam = createCamera();
+
 
   // instantiate player object and hitbox visual
   my.player = new Crewmate(0,0,0,0,0);
@@ -100,8 +102,8 @@ function setup() {
   console.log("guests", JSON.stringify(guests));
   console.log("am i host?", partyIsHost());
 
-
-  }
+  partySubscribe("die", die);
+  } 
 
 
 
@@ -229,7 +231,7 @@ function drawPlayers() {
       // calculate ambient lighting depending on the closest distance to another light before rendering
       let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
       ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
-      drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold)
+      drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold,guest.player.alive)
     pop();
   }
 
@@ -238,15 +240,15 @@ function drawPlayers() {
     push();
       let minimumDistance = min(lightpos.map(v => dist(0,0,v[0], v[1])));
       ambientLight(map(minimumDistance,0,125 + 50*lightSize,105,5,true));
-      drawCrewMateModel(0,0,0,frameCount,180,2);
+      drawCrewMateModel(0,0,0,0,180,2,false);
     pop();
   }
 }
 
 // Draw player model
-function drawCrewMateModel(x,y,z,dir,h,hold) {
+function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
   push();
-  // console.log(y)
+  
     // inititalize materials and position
     noStroke();
     specularMaterial(25);
@@ -254,48 +256,88 @@ function drawCrewMateModel(x,y,z,dir,h,hold) {
     ambientMaterial(h, 255, 255);
     translate(x,y-36,z);
     rotateY(dir);
+  if (alive) {
+      // draw main body
+      ellipsoid(25,30,20);
 
+      // draw helmet
+      push();
+        specularMaterial(300);
+        shininess(20);
+        ambientMaterial(0,0,0);
+
+        translate(0,-10,14);
+        ellipsoid(15,10,13);
+      pop();
+
+      // draw legs
+      push();
+        translate(12,18,0);
+        ellipsoid(8,18,8);
+        translate(-24,0,0);
+        ellipsoid(8,18,8);
+      pop();
+      // draw oxygen tank
+      push();
+        translate(0,0,-18);
+        box(24,35,8);
+      pop();
+
+      if (hold === 2) {
+        // draw knife
+        push();
+          ambientMaterial(0,120,255);
+          translate(16,8,15);
+          rotateY(-90);
+
+          box(20,6,2)
+          translate(22,0,0);
+          rotateZ(-90);
+
+          ambientMaterial(0,120,60);
+          scale(1,1,0.3)
+          cone(8,30,5,0);
+        pop();
+    }
+  
+  }
+  else {
     // draw main body
-    ellipsoid(25,30,20);
-
-    // draw helmet
     push();
-      specularMaterial(300);
-      shininess(20);
-      ambientMaterial(0,0,0);
-
-      translate(0,-10,14);
-      ellipsoid(15,10,13);
+      translate(0,15,0)
+      ellipsoid(20,15,15);
+      scale(1, 1, 0.75);
+      translate(0,-9,0)
+      cylinder(20,16);
     pop();
-
-    // draw legs
     push();
       translate(12,18,0);
       ellipsoid(8,18,8);
       translate(-24,0,0);
       ellipsoid(8,18,8);
     pop();
-    // draw oxygen tank
+
+    // draw bone sticking out
     push();
-      translate(0,0,-18);
-      box(24,35,8);
+      specularMaterial(30000);
+      shininess(100);
+      ambientMaterial(0,0,255);
+      translate(0,-5,0)
+      cylinder(4,20);
+
+      translate(3,-9,0)
+      sphere(5);
+      translate(-6,0,0);
+      sphere(5);
     pop();
 
-    if (hold === 2) {
-      // draw knife
-      push();
-        ambientMaterial(0,120,255);
-        translate(16,8,15);
-        rotateY(-90);
+    // draw oxygen tank
+    push();
+      translate(0,8,-14);
+      box(24,20,10);
+    pop();
+    
 
-        box(20,6,2)
-        translate(22,0,0);
-        rotateZ(-90);
-
-        ambientMaterial(0,120,60);
-        scale(1,1,0.3)
-        cone(8,30,5,0);
-      pop();
   }
   pop();
 }
@@ -421,6 +463,20 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
   return(round((dir1 + dir2)/2,2));
 }
 
+function die(data) {
+  console.log(my.player.id, data.id)
+  if (data.id === my.player.id) {
+    
+    console.log('bruh');
+    my.player.alive = false;
+    my.player.dx = data.dx;
+    my.player.dy = data.dy;
+    my.player.dz = data.dz;
+    my.player.hold = 0;
+  }
+}
+
+
 
 // Crewmate class for holding data and taking user input
 class Crewmate {
@@ -434,108 +490,179 @@ class Crewmate {
     this.dz = 0;
     this.h = h
     this.hold = 1;
+    this.alive = true;
+    this.id = noise(random(1,10));
   }
 
   update() {
-    // select item
-    if (keyIsDown(49)) {
-      this.hold = 0;
-    }
-    else if (keyIsDown(50)) {
-      this.hold = 1;
-    }
-    else if (keyIsDown(51)) {
-      this.hold = 2
-    }
+    if (this.alive) {
+      // select item
+      if (keyIsDown(49)) {
+        this.hold = 0;
+      }
+      else if (keyIsDown(50)) {
+        this.hold = 1;
+      }
+      else if (keyIsDown(51)) {
+        this.hold = 2
+      }
 
-
-    // apply x velocity and check collisions
-    this.x += this.dx;
-    this.z += this.dz;
-
-    for (let terrainObject of terrain) {
-      if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
-        let n = findNormal(this.x, this.z, this.dir, terrainObject);
-        while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
-          this.x -= sin(n);
-          this.z -= cos(n);
+      if (this.hold === 2) {
+        for (let guest of guests) {
+          if (guest.player != my.player) {
+            if (dist(guest.player.x,guest.player.y,guest.player.z,my.player.x,my.player.y,my.player.z) < 300) {
+              if (mouseIsPressed && !killSFX.isPlaying()) {
+                killSFX.play();
+                let dir = atan2(my.player.x - guest.player.x, my.player.z - guest.player.z)
+                partyEmit("die", {
+                  id: guest.player.id,
+                  dx: sin(dir) * -5,
+                  dy: -4,
+                  dz: cos(dir) * -5
+                  })
+                
+              }
+            }
+          }
         }
       }
-    }
 
-    // point in direction of motion
-    this.dir = atan2(this.dx,this.dz);
+      // apply x velocity and check collisions
+      this.x += this.dx;
+      this.z += this.dz;
 
-    // apply y velocity and check collisions
-    this.y += this.dy;
-
-    let touchingGround = false;
-
-    for (let terrainObject of terrain) {
-      if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
-        if (this.dy >= 0) {
-          while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
-            this.y -= 0.1;
+      for (let terrainObject of terrain) {
+        if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+          let n = findNormal(this.x, this.z, this.dir, terrainObject);
+          while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
+            this.x -= sin(n);
+            this.z -= cos(n);
           }
-          this.dy = 0;
-          if (keyIsDown(32)) {
-            this.dy = -5;
-          }
-          
         }
-        else if (this.dy < 0) {
-          while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
-            this.y += 0.1;
-          }
-          this.dy = 0;
-        }
-        touchingGround = true;
-      } 
-    }
-
-    if (!touchingGround) {
-      this.dy += 0.15;
-    }
-
-
-
-    // detect keyboard input
-      // 87 = W
-      // 65 = A
-      // 83 = S
-      // 68 = D
-    if (keyIsDown(83) + keyIsDown(87) === 1 || keyIsDown(65) + keyIsDown(68) === 1) {
-
-      // perform math stuff
-      let magnitude = !keyIsDown(83) * 2 - 1;
-      let dir = 
-      (keyIsDown(68) * 0 + 
-      keyIsDown(87) * 90 +
-      keyIsDown(65) * 180 + 
-      keyIsDown(83) * 90) / 
-      (keyIsDown(68) + 
-      keyIsDown(87) + 
-      keyIsDown(65) + 
-      keyIsDown(83))  * magnitude
-
-      // accelerate player
-      this.dx -= playerAcceleration * sin(dir - camYaw);
-      this.dz -= playerAcceleration * cos(dir - camYaw);
-
-      // cap player velocity
-      if (Math.sqrt(this.dx**2 + this.dz**2) > 6) {
-        let ratio = 6/Math.sqrt(this.dx**2 + this.dz**2);
-        this.dx = lerp(0,this.dx,ratio);
-        this.dz = lerp(0,this.dz,ratio);
       }
+
+      // point in direction of motion
+      this.dir = atan2(this.dx,this.dz);
+
+      // apply y velocity and check collisions
+      this.y += this.dy;
+
+      let touchingGround = false;
+
+      for (let terrainObject of terrain) {
+        if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+          if (this.dy >= 0) {
+            while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+              this.y -= 0.1;
+            }
+            this.dy = 0;
+            if (keyIsDown(32)) {
+              this.dy = -5;
+            }
+            
+          }
+          else if (this.dy < 0) {
+            while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+              this.y += 0.1;
+            }
+            this.dy = 0;
+          }
+          touchingGround = true;
+        } 
+      }
+
+      if (!touchingGround) {
+        this.dy += 0.15;
+      }
+
+
+
+      // detect keyboard input
+        // 87 = W
+        // 65 = A
+        // 83 = S
+        // 68 = D
+      if (keyIsDown(83) + keyIsDown(87) === 1 || keyIsDown(65) + keyIsDown(68) === 1) {
+
+        // perform math stuff
+        let magnitude = !keyIsDown(83) * 2 - 1;
+        let dir = 
+        (keyIsDown(68) * 0 + 
+        keyIsDown(87) * 90 +
+        keyIsDown(65) * 180 + 
+        keyIsDown(83) * 90) / 
+        (keyIsDown(68) + 
+        keyIsDown(87) + 
+        keyIsDown(65) + 
+        keyIsDown(83))  * magnitude
+
+        // accelerate player
+        this.dx -= playerAcceleration * sin(dir - camYaw);
+        this.dz -= playerAcceleration * cos(dir - camYaw);
+
+        // cap player velocity
+        if (Math.sqrt(this.dx**2 + this.dz**2) > 6) {
+          let ratio = 6/Math.sqrt(this.dx**2 + this.dz**2);
+          this.dx = lerp(0,this.dx,ratio);
+          this.dz = lerp(0,this.dz,ratio);
+        }
+
+      }
+      else {
+        // decelerate player
+        this.dx = this.dx * playerDeceleration
+        this.dz = this.dz * playerDeceleration
+      }
+      shared.ambientLevel += keyIsDown(UP_ARROW) - keyIsDown(DOWN_ARROW);
+
 
     }
     else {
+      // apply x velocity and check collisions
+      this.x += this.dx;
+      this.z += this.dz;
 
-      // decelerate player
-      this.dx = this.dx * playerDeceleration
-      this.dz = this.dz * playerDeceleration
-    }
-    shared.ambientLevel += keyIsDown(UP_ARROW) - keyIsDown(DOWN_ARROW);
+      for (let terrainObject of terrain) {
+        if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+          let n = findNormal(this.x, this.z, this.dir, terrainObject);
+          while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
+            this.x -= sin(n);
+            this.z -= cos(n);
+          }
+          let mag = sqrt(this.dx * this.dx + this.dz * this.dz)
+          this.dx = mag * -sin(n);
+          this.dz = mag * -cos(n);
+        }
+      }
+
+
+      // apply y velocity and check collisions
+      this.y += this.dy;
+
+      let touchingGround = false;
+
+      for (let terrainObject of terrain) {
+        if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+          if (this.dy >= 0) {
+            while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+              this.y -= 0.1;
+            }
+          }
+          else if (this.dy < 0) {
+            while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
+              this.y += 0.1;
+            }
+          }
+          this.dy = -this.dy;
+          touchingGround = true;
+        }
+      }
+
+      // this.dx = this.dx * playerDeceleration
+      // this.dz = this.dz * playerDeceleration
+      if (!touchingGround) {
+        this.dy += 0.15;
+      }
+    } //else end
   }
 }
