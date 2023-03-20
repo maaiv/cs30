@@ -61,19 +61,21 @@ let maxVelocity = 6;
   
 
 // Create environment objects
-let terrain = [
+let myTerrain = [
   {type: 'box', x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
   {type: 'box', x: 300, y: -30, z: 0, width: 100, height: 60, length: 100}, 
   {type: 'box', x: 450, y: -110, z: 0, width: 100, height: 60, length: 100}, 
   {type: 'box', x: 300, y: -30, z: 400, width: 300, height: 60, length: 300},
   {type: 'box', x: -300, y: -30, z: -600, width: 800, height: 60, length: 800},
   {type: 'cylinder', x: -300, y: -30, z: 400, radius: 100, height: 60},
-  {type: 'cylinder', x: 000, y: -350, z: 1500, radius: 200, height: 700}
+  {type: 'cylinder', x: 000, y: -350, z: 1500, radius: 200, height: 700},
+  {type: 'cylinder', x: -700, y: -380, z: 1500, radius: 200, height: 760},
+  {type: 'cylinder', x: -700 * 2, y: -350 - 30*2, z: 1500, radius: 200, height: 700 + 60 * 2}
 ];
 
 
 for (let i = 1; i < 10; i += 1) {
-  terrain.push({type: 'box', x: 450, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
+  myTerrain.push({type: 'box', x: 450, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
 }
 
 // Connect to the server and shared data
@@ -81,7 +83,7 @@ function preload() {
   partyConnect("wss://demoserver.p5party.org", "among");
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
-  shared = partyLoadShared("shared", {ambientLevel: 0, debugState: false});
+  shared = partyLoadShared("shared", {ambientLevel: 0, debugState: false, terrain: myTerrain});
   killSFX = loadSound('assets/killSFX.mp3');
 };
 
@@ -158,7 +160,7 @@ function collideVisual() {
 
 
     // draw environment hitboxes
-    for (let terrainObject of terrain) {
+    for (let terrainObject of shared.terrain) {
       push();
         if (terrainObject.type === 'box') {
           let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90;
@@ -362,7 +364,7 @@ function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
 // Draw terrain
 function drawEnvironment() {
 
-  for (let terrainObject of terrain) {
+  for (let terrainObject of shared.terrain) {
     push();
       translate(terrainObject.x,terrainObject.y,terrainObject.z);
       if (terrainObject.type === 'box') {
@@ -504,7 +506,7 @@ class Crewmate {
     this.dx = 0;
     this.dy = 0;
     this.dz = 0;
-    this.h = h
+    this.h = random(255);
     this.hold = 1;
     this.alive = true;
     this.id = noise(random(1,10));
@@ -521,7 +523,7 @@ class Crewmate {
         this.hold = 1;
       }
       else if (keyIsDown(51)) {
-        this.hold = 2
+        this.hold = 2;
       }
 
       if (this.hold === 2) {
@@ -549,7 +551,7 @@ class Crewmate {
       this.x += this.dx;
       this.z += this.dz;
 
-      for (let terrainObject of terrain) {
+      for (let terrainObject of shared.terrain) {
         if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
           let n = findNormal(this.x, this.z, this.dir, terrainObject);
           while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
@@ -573,7 +575,7 @@ class Crewmate {
 
       let touchingGround = false;
 
-      for (let terrainObject of terrain) {
+      for (let terrainObject of shared.terrain) {
         if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
           if (this.dy >= 0) {
             while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
@@ -646,7 +648,7 @@ class Crewmate {
       this.x += this.dx;
       this.z += this.dz;
 
-      for (let terrainObject of terrain) {
+      for (let terrainObject of shared.terrain) {
         if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
           let n = findNormal(this.x, this.z, this.dir, terrainObject);
           while (checkCollisions(this.x, this.y, this.z,terrainObject)) {
@@ -665,7 +667,7 @@ class Crewmate {
 
       let touchingGround = false;
 
-      for (let terrainObject of terrain) {
+      for (let terrainObject of shared.terrain) {
         if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
           if (this.dy >= 0) {
             while (checkCollisions(this.x, this.y, this.z, terrainObject)) {
