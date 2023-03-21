@@ -7,10 +7,7 @@
 
 let bubbles = [];
 
-let grid = [[0, 0, 1, 1],
-            [1, 1, 0, 0],
-            [0, 1, 0, 1],
-            [1, 1, 1, 1]];
+let grid;
 
 let cellSize;
 
@@ -18,10 +15,13 @@ let cellSize;
 const ROWS = 16;
 const COLS = 16;
 
+
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   createRandomGrid();
   noStroke();
+  grid = createRandomGrid(ROWS, COLS);
 }
 
 function draw() {
@@ -61,6 +61,10 @@ function mousePressed() {
   let x = Math.floor(mouseX/cellSize);
   let y = Math.floor(mouseY/cellSize);
   grid[y][x] = !grid[y][x];
+  grid[y-1][x] = !grid[y-1][x];
+  grid[y+1][x] = !grid[y+1][x];
+  grid[y][x+1] = !grid[y][x+1];
+  grid[y][x-1] = !grid[y][x-1];
 }
 
 function createRandomGrid(ROWS, COLS) {
