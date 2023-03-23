@@ -30,20 +30,22 @@ let camPitch = 0; //y
 let camDistance = 300;
 let lightpos = [];
 
+let my, guests, shared, killSFX, cam, collideVisualCanvas;
+
 // Create environment objects
 let hostTerrain = [
-  {type: 'box', x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
-  {type: 'box', x: 300, y: -30, z: 0, width: 100, height: 60, length: 100}, 
-  {type: 'box', x: 500, y: -110, z: 0, width: 100, height: 60, length: 100}, 
-  {type: 'box', x: 300, y: -30, z: 400, width: 300, height: 60, length: 300},
-  {type: 'box', x: -300, y: -30, z: -600, width: 800, height: 60, length: 800},
-  {type: 'cylinder', x: -300, y: -30, z: 400, radius: 100, height: 60},
-  {type: 'cylinder', x: 000, y: -350, z: 1500, radius: 200, height: 700},
-  {type: 'cylinder', x: -700, y: -380, z: 1500, radius: 200, height: 760},
-  {type: 'cylinder', x: -700 * 2, y: -350 - 30*2, z: 1500, radius: 200, height: 700 + 60 * 2}
+  {type: "box", x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
+  {type: "box", x: 300, y: -30, z: 0, width: 100, height: 60, length: 100}, 
+  {type: "box", x: 500, y: -110, z: 0, width: 100, height: 60, length: 100}, 
+  {type: "box", x: 300, y: -30, z: 400, width: 300, height: 60, length: 300},
+  {type: "box", x: -300, y: -30, z: -600, width: 800, height: 60, length: 800},
+  {type: "cylinder", x: -300, y: -30, z: 400, radius: 100, height: 60},
+  {type: "cylinder", x: 0, y: -350, z: 1500, radius: 200, height: 700},
+  {type: "cylinder", x: -700, y: -380, z: 1500, radius: 200, height: 760},
+  {type: "cylinder", x: -700 * 2, y: -350 - 30*2, z: 1500, radius: 200, height: 700 + 60 * 2}
 ];
 for (let i = 1; i < 10; i += 1) {
-  hostTerrain.push({type: 'box', x: 500, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
+  hostTerrain.push({type: "box", x: 500, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
 }
 
 // Connect to the server and shared data, and load sounds
@@ -52,20 +54,20 @@ function preload() {
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {
-                                      ambientLevel: 0, 
-                                      debugState: false, 
-                                      terrain: hostTerrain, 
-                                      lightSize: 10,
-                                      playerAcceleration: 1,
-                                      playerDeceleration: 0.9,
-                                      playerMaxVelocity: 6,
-                                      playerJumpPower: 5,
-                                      worldGravity: 0.15,
-                                      playerPerspective: 3
-                                    });
-  killSFX = loadSound('assets/killSFX.mp3');
+    ambientLevel: 0, 
+    debugState: false, 
+    terrain: hostTerrain, 
+    lightSize: 10,
+    playerAcceleration: 1,
+    playerDeceleration: 0.9,
+    playerMaxVelocity: 6,
+    playerJumpPower: 5,
+    worldGravity: 0.15,
+    playerPerspective: 3
+  });
+  killSFX = loadSound("assets/killSFX.mp3");
   partySubscribe("die", die);
-};
+}
 
 // Set sketch modes, canvas, and subscribe to die message
 function setup() {
@@ -84,7 +86,7 @@ function setup() {
   console.log("me", JSON.stringify(my));
   console.log("guests", JSON.stringify(guests));
   console.log("am i host?", partyIsHost());
-  } 
+} 
 
 
 // Game update loop
@@ -128,16 +130,16 @@ function collideVisual() {
     // draw environment hitboxes
     for (let terrainObject of shared.terrain) {
       push();
-        if (terrainObject.type === 'box') {
-          let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90;
-          let boxMiniZ = (terrainObject.z - terrainObject.length/2)/10 + 90;
-          collideVisualCanvas.rect(boxMiniX, boxMiniZ, terrainObject.width/10, terrainObject.length/10);
-        }
-        if (terrainObject.type === 'cylinder') {
-          let cylinderMiniX = terrainObject.x/10 + 90;
-          let cylinderMiniZ = terrainObject.z/10 + 90;
-          collideVisualCanvas.circle(cylinderMiniX,cylinderMiniZ,terrainObject.radius/5);
-        }
+      if (terrainObject.type === "box") {
+        let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90;
+        let boxMiniZ = (terrainObject.z - terrainObject.length/2)/10 + 90;
+        collideVisualCanvas.rect(boxMiniX, boxMiniZ, terrainObject.width/10, terrainObject.length/10);
+      }
+      if (terrainObject.type === "cylinder") {
+        let cylinderMiniX = terrainObject.x/10 + 90;
+        let cylinderMiniZ = terrainObject.z/10 + 90;
+        collideVisualCanvas.circle(cylinderMiniX,cylinderMiniZ,terrainObject.radius/5);
+      }
       pop();
     }
 
@@ -149,8 +151,8 @@ function collideVisual() {
 
     //draw visualizer above the player model
     push();
-      translate(my.player.x - 50,my.player.y-65 - 100,my.player.z);
-      image(collideVisualCanvas,0,0,100,100);
+    translate(my.player.x - 50,my.player.y-65 - 100,my.player.z);
+    image(collideVisualCanvas,0,0,100,100);
     pop();
   }
 }
@@ -167,7 +169,7 @@ function updateCam() {
       my.player.x + cos(camYaw) * camDistance * cos(camPitch),
       my.player.y - 60 + sin(camPitch) * camDistance,
       my.player.z + sin(camYaw) * camDistance * cos(camPitch),
-      );
+    );
     camYaw += movedX/10;
     camPitch -= movedY/10;
 
@@ -186,12 +188,12 @@ function updateCam() {
       my.player.x + cos(camYaw) * cos(camPitch),
       my.player.y - 60 + sin(camPitch),
       my.player.z + sin(camYaw) * cos(camPitch),
-      );
+    );
     camYaw += movedX/10;
     camPitch -= movedY/10;
 
     cam.lookAt(my.player.x,my.player.y - 60,my.player.z);
-    }
+  }
 }
 
 // Create and store xy coordinate of each player light
@@ -204,7 +206,8 @@ function createLights() {
         0,0,255,
         guest.player.x,guest.player.y - 400,guest.player.z,
         0,1,0,
-        85,40/shared.lightSize);
+        85,40/shared.lightSize
+      );
       lightpos.push([guest.player.x,guest.player.z]);
     }
   }
@@ -213,12 +216,12 @@ function createLights() {
 // Calculate ambient lighting and draw player models
 function drawPlayers() {
   for (let guest of guests) {
-    if (guest.player != my.player || shared.playerPerspective === 3) {
+    if (guest.player !== my.player || shared.playerPerspective === 3) {
       push();
-        // calculate ambient lighting depending on the closest distance to another light before rendering
-        let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
-        ambientLight(map(minimumDistance,0,125 + 50*shared.lightSize,105,5,true));
-        drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold,guest.player.alive);
+      // calculate ambient lighting depending on the closest distance to another light before rendering
+      let minimumDistance = min(lightpos.map(v => dist(guest.player.x,guest.player.z,v[0], v[1])));
+      ambientLight(map(minimumDistance,0,125 + 50*shared.lightSize,105,5,true));
+      drawCrewMateModel(guest.player.x,guest.player.y,guest.player.z,guest.player.dir,guest.player.h,guest.player.hold,guest.player.alive);
       pop();
     }
   }
@@ -226,9 +229,9 @@ function drawPlayers() {
   // draw demo player model if in debug mode
   if (shared.debugState) {
     push();
-      let minimumDistance = min(lightpos.map(v => dist(0,0,v[0], v[1])));
-      ambientLight(map(minimumDistance,0,125 + 50*shared.lightSize,105,5,true));
-      drawCrewMateModel(0,0,0,0,180,2,false);
+    let minimumDistance = min(lightpos.map(v => dist(0, 0, v[0], v[1])));
+    ambientLight(map(minimumDistance, 0, 125 + 50 * shared.lightSize, 105, 5, true));
+    drawCrewMateModel(0,0,0,0,180,2,false);
     pop();
   }
 }
@@ -237,92 +240,92 @@ function drawPlayers() {
 function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
   push();
   
-    // inititalize materials and position
-    noStroke();
-    specularMaterial(25);
-    shininess(10000);
-    ambientMaterial(h, 255, 255);
-    translate(x,y-36,z);
-    rotateY(dir);
+  // inititalize materials and position
+  noStroke();
+  specularMaterial(25);
+  shininess(10000);
+  ambientMaterial(h, 255, 255);
+  translate(x,y-36,z);
+  rotateY(dir);
   if (alive) {
-      // draw main body
-      ellipsoid(25,30,20);
+    // draw main body
+    ellipsoid(25,30,20);
 
-      // draw helmet
+    // draw helmet
+    push();
+    specularMaterial(300);
+    shininess(20);
+    ambientMaterial(0,0,0);
+
+    translate(0,-10,14);
+    ellipsoid(15,10,13);
+    pop();
+
+    // draw legs
+    push();
+    translate(12,18,0);
+    ellipsoid(8,18,8);
+    translate(-24,0,0);
+    ellipsoid(8,18,8);
+    pop();
+    // draw oxygen tank
+    push();
+    translate(0,0,-18);
+    box(24,35,8);
+    pop();
+
+    if (hold === 2) {
+      // draw knife
       push();
-        specularMaterial(300);
-        shininess(20);
-        ambientMaterial(0,0,0);
+      ambientMaterial(0,120,255);
+      translate(16,8,15);
+      rotateY(-90);
 
-        translate(0,-10,14);
-        ellipsoid(15,10,13);
+      box(20,6,2);
+      translate(22,0,0);
+      rotateZ(-90);
+
+      ambientMaterial(0,120,60);
+      scale(1,1,0.3);
+      cone(8,30,5,0);
       pop();
-
-      // draw legs
-      push();
-        translate(12,18,0);
-        ellipsoid(8,18,8);
-        translate(-24,0,0);
-        ellipsoid(8,18,8);
-      pop();
-      // draw oxygen tank
-      push();
-        translate(0,0,-18);
-        box(24,35,8);
-      pop();
-
-      if (hold === 2) {
-        // draw knife
-        push();
-          ambientMaterial(0,120,255);
-          translate(16,8,15);
-          rotateY(-90);
-
-          box(20,6,2)
-          translate(22,0,0);
-          rotateZ(-90);
-
-          ambientMaterial(0,120,60);
-          scale(1,1,0.3)
-          cone(8,30,5,0);
-        pop();
     }
   
   }
   else {
     // draw main body
     push();
-      translate(0,15,0);
-      ellipsoid(20,15,15);
-      scale(1, 1, 0.75);
-      translate(0,-9,0)
-      cylinder(20,16);
+    translate(0,15,0);
+    ellipsoid(20,15,15);
+    scale(1, 1, 0.75);
+    translate(0,-9,0);
+    cylinder(20,16);
     pop();
     push();
-      translate(12,18,0);
-      ellipsoid(8,18,8);
-      translate(-24,0,0);
-      ellipsoid(8,18,8);
+    translate(12,18,0);
+    ellipsoid(8,18,8);
+    translate(-24,0,0);
+    ellipsoid(8,18,8);
     pop();
 
     // draw bone sticking out
     push();
-      specularMaterial(30000);
-      shininess(100);
-      ambientMaterial(0,0,255);
-      translate(0,-5,0);
-      cylinder(4,20);
+    specularMaterial(30000);
+    shininess(100);
+    ambientMaterial(0,0,255);
+    translate(0,-5,0);
+    cylinder(4,20);
 
-      translate(3,-9,0);
-      sphere(5);
-      translate(-6,0,0);
-      sphere(5);
+    translate(3,-9,0);
+    sphere(5);
+    translate(-6,0,0);
+    sphere(5);
     pop();
 
     // draw oxygen tank
     push();
-      translate(0,8,-14);
-      box(24,20,10);
+    translate(0,8,-14);
+    box(24,20,10);
     pop();
   }
   pop();
@@ -333,35 +336,35 @@ function drawEnvironment() {
 
   for (let terrainObject of shared.terrain) {
     push();
-      if (!shared.debugState) {
-        noStroke();
-      }
-      translate(terrainObject.x,terrainObject.y,terrainObject.z);
-      if (terrainObject.type === 'box') {
-        box(terrainObject.width,terrainObject.height,terrainObject.length);
-      }
-      else if (terrainObject.type === 'cylinder') {
-        cylinder(terrainObject.radius,terrainObject.height);
-      }
+    if (!shared.debugState) {
+      noStroke();
+    }
+    translate(terrainObject.x,terrainObject.y,terrainObject.z);
+    if (terrainObject.type === "box") {
+      box(terrainObject.width,terrainObject.height,terrainObject.length);
+    }
+    else if (terrainObject.type === "cylinder") {
+      cylinder(terrainObject.radius,terrainObject.height);
+    }
     pop();
   }
 
   // create axes if in debug mode
   if (shared.debugState) {
     push();
-      stroke("red"); // x
-      line(-900,0,0,900,0,0);
-      stroke("blue"); // y
-      line(0,-900,0,0,900,0);
-      stroke("yellow"); // z
-      line(0,0,-900,0,0,900);
+    stroke("red"); // x
+    line(-900,0,0,900,0,0);
+    stroke("blue"); // y
+    line(0,-900,0,0,900,0);
+    stroke("yellow"); // z
+    line(0,0,-900,0,0,900);
     pop();
   }
 }
 
 // Check if a player is intersecting with the terrain
 function checkCollisions(playerX,playerY,playerZ,terrainObject) {
-  if (terrainObject.type === 'box') {
+  if (terrainObject.type === "box") {
     if (collideRectCircle(
       terrainObject.x - terrainObject.width/2, 
       terrainObject.z - terrainObject.length/2,
@@ -371,10 +374,10 @@ function checkCollisions(playerX,playerY,playerZ,terrainObject) {
       playerZ,
       60
     )) {
-      return(playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2);
+      return playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2;
     }
   }
-  else if (terrainObject.type === 'cylinder') {
+  else if (terrainObject.type === "cylinder") {
     if (collideCircleCircle(
       terrainObject.x,
       terrainObject.z,
@@ -383,10 +386,10 @@ function checkCollisions(playerX,playerY,playerZ,terrainObject) {
       playerZ,
       60
     )) {
-    return(playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2);
+      return playerY > terrainObject.y - terrainObject.height/2 && playerY - 65 < terrainObject.y + terrainObject.height/2;
     }
   }
-return(false);
+  return false;
 }
 
 // Calculate the normal angle between the player and the collided object
@@ -394,7 +397,7 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
   let normalCollide;
 
   // set collide type
-  if (terrainObject.type === 'box') {
+  if (terrainObject.type === "box") {
     normalCollide = (x, z, dir, terrainObject) => collidePointRect(
       x + sin(dir) * 40,
       z + cos(dir) * 40,
@@ -404,7 +407,7 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
       terrainObject.length,
     );
   }
-  else if (terrainObject.type === 'cylinder') {
+  else if (terrainObject.type === "cylinder") {
     normalCollide = (x, z, dir, terrainObject) => collidePointCircle(
       x + sin(dir) * 40,
       z + cos(dir) * 40,

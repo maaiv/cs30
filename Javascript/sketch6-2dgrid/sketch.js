@@ -29,9 +29,6 @@ function draw() {
     grid = createRandomGrid(ROWS, COLS);
   }
   resizeCanvas(windowWidth,windowHeight);
-
-
-
   if (width < height) { 
     cellSize = width/ROWS;
   }
