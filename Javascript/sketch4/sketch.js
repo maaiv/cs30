@@ -7,8 +7,12 @@
 let renderer, ptLight, material, geometry, mappedmouseX, cube, scene, camera;
 
 
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 function setup(){
+
+  
+
   scene = new THREE.Scene();
   scene.background = new THREE.Color("hsl(0,0,255)");
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
@@ -21,20 +25,35 @@ function setup(){
   renderer.shadowMap.enabled = true;
   document.body.appendChild( renderer.domElement );
 
-  // Light
 
+
+
+
+  // Light
   scene.add( new THREE.AmbientLight( new THREE.Color(1,1,1), 0.1 ) );
 
   ptLight = new THREE.PointLight( new THREE.Color(1,1,1), 0.7);
-  ptLight.position.set( 0, 3, 3 );
-  ptLight.castShadows = true;
+  ptLight.position.set( 0, 3, 0 );
+  ptLight.castShadow = true;
   ptLight.shadow.mapSize.width = 1024;
   ptLight.shadow.mapSize.height = 1024;
-  ptLight.shadow.camera.near = 3;
-  ptLight.shadow.camera.far = 10;
+ 
   scene.add( ptLight );
     
 
+
+
+  // Piano Model hehe
+  const loader = new GLTFLoader();
+  loader.load("scene.gltf", function (gltf) {
+
+    scene.add( gltf.scene );
+  
+  }, undefined, function ( error ) {
+  
+    console.error( error );
+  
+  } );
 
 
   // Geometry
