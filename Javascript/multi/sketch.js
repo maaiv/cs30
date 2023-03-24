@@ -32,6 +32,7 @@ let lightpos = [];
 
 let my, guests, shared, killSFX, cam, collideVisualCanvas;
 
+
 // Create environment objects
 let hostTerrain = [
   {type: "box", x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
@@ -42,11 +43,12 @@ let hostTerrain = [
   {type: "cylinder", x: -300, y: -30, z: 400, radius: 100, height: 60},
   {type: "cylinder", x: 0, y: -350, z: 1500, radius: 200, height: 700},
   {type: "cylinder", x: -700, y: -380, z: 1500, radius: 200, height: 760},
-  {type: "cylinder", x: -700 * 2, y: -350 - 30*2, z: 1500, radius: 200, height: 700 + 60 * 2}
+  {type: "cylinder", x: -700 * 2, y: -410, z: 1500, radius: 200, height: 820}
 ];
 for (let i = 1; i < 10; i += 1) {
   hostTerrain.push({type: "box", x: 500, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
 }
+
 
 // Connect to the server and shared data, and load sounds
 function preload() {
@@ -126,7 +128,6 @@ function drawInit() {
 function collideVisual() {
   if (shared.debugState) {
     collideVisualCanvas.background(255);
-
     // draw environment hitboxes
     for (let terrainObject of shared.terrain) {
       push();
@@ -434,7 +435,7 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
       tempDir -= 1;
     }
     dir2 = tempDir;
-    }
+  }
 
   else {
     // find right-most point
@@ -451,7 +452,7 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
     dir2 = tempDir + 360;
   }
 
-  return(round((dir1 + dir2)/2,2));
+  return round((dir1 + dir2)/2,2);
 }
 
 // Update player if killed
@@ -508,7 +509,7 @@ class Crewmate {
       // use knife
       if (this.hold === 2) {
         for (let guest of guests) {
-          if (guest.player != my.player && mouseIsPressed && !killSFX.isPlaying()) {
+          if (guest.player !== my.player && mouseIsPressed && !killSFX.isPlaying()) {
             if (dist(guest.player.x,guest.player.y,guest.player.z,my.player.x,my.player.y,my.player.z) < 300) {
               killSFX.play();
               let tempDir = atan2(my.player.x - guest.player.x, my.player.z - guest.player.z);
@@ -578,10 +579,6 @@ class Crewmate {
       }
 
       // detect keyboard input
-        // 87 = W
-        // 65 = A
-        // 83 = S
-        // 68 = D
       if (keyIsDown(83) + keyIsDown(87) === 1 || keyIsDown(65) + keyIsDown(68) === 1) {
 
         // perform math stuff to condense movement controls into a "single line" (this was a terrible idea)
@@ -609,8 +606,8 @@ class Crewmate {
       }
       else {
         // decelerate player
-        this.dx = this.dx * shared.playerDeceleration
-        this.dz = this.dz * shared.playerDeceleration
+        this.dx = this.dx * shared.playerDeceleration;
+        this.dz = this.dz * shared.playerDeceleration;
       }
       
       // change world ambient level
@@ -631,7 +628,7 @@ class Crewmate {
             this.x -= sin(n);
             this.z -= cos(n);
           }
-          let mag = sqrt(this.dx * this.dx + this.dz * this.dz)
+          let mag = sqrt(this.dx * this.dx + this.dz * this.dz);
           this.dx = mag * -sin(n);
           this.dz = mag * -cos(n);
         }
@@ -641,7 +638,7 @@ class Crewmate {
       // apply y velocity and check collisions
       this.y += this.dy;
       let touchingGround = false;
-
+      
       for (let terrainObject of shared.terrain) {
         if (checkCollisions(this.x, this.y, this.z, terrainObject)) {
           if (this.dy >= 0) {
