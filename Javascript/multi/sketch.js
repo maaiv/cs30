@@ -30,7 +30,7 @@ let camPitch = 0; //y
 let camDistance = 300;
 let lightpos = [];
 
-let my, guests, shared, killSFX, cam, collideVisualCanvas;
+let my, guests, shared, killSFX, cam, collideVisualCanvas, mrGuest;
 
 
 // Create environment objects
@@ -53,6 +53,7 @@ for (let i = 1; i < 10; i += 1) {
 // Connect to the server and shared data, and load sounds
 function preload() {
   partyConnect("wss://demoserver.p5party.org", "among");
+  mrGuest = loadImage("photo.jpg");
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {
@@ -239,7 +240,9 @@ function drawPlayers() {
 
 // Draw player model
 function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
+  
   push();
+  
   
   // inititalize materials and position
   noStroke();
@@ -250,8 +253,9 @@ function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
   rotateY(dir);
   if (alive) {
     // draw main body
-    ellipsoid(25,30,20);
 
+    ellipsoid(25,30,20);
+    
     // draw helmet
     push();
     specularMaterial(300);
