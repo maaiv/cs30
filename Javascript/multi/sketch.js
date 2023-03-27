@@ -125,6 +125,8 @@ function drawInit() {
   }
 }
 
+
+
 // Creates a visualizer for the different hitboxes and colliders above the player if in debug mode
 function collideVisual() {
   if (shared.debugState) {
