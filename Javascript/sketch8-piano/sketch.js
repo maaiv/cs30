@@ -6,46 +6,97 @@
 // - describe what you did to take this project "above and beyond"
 
 let keys = [];
+let WHITEWIDTH = 70, BLACKWIDTH = 50;
+let octaves = 2;
+let monoSynth;
+let whiteNotes = ["C","D","E","F","G","A","B"];
 
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  for (let i = 0; i < 2; i++) {
-    keys.push("white");
-    keys.push("black");
+  for (let i = 0; i < 7 * octaves; i++) {
+    keys.push(new pianoKey("white", i * WHITEWIDTH, i));
   }
-  keys.push("white");
-  for (let i = 0; i < 3; i++) {
-    keys.push("white");
-    keys.push("black");
+
+  let offset = 0
+  for (let i = 0; i < 5 * octaves; i++) {
+
+    keys.push(new pianoKey("black", i * WHITEWIDTH + WHITEWIDTH - BLACKWIDTH/2 + offset, i));
+    if (i % 5 === 1 || i % 5 === 4) {
+      offset += WHITEWIDTH;
+    }
   }
-  keys.push("white");
+
+  monoSynth = new p5.MonoSynth();
 }
 
 function draw() {
-  background(220);
-  for (let i = 0; i < keys.length; i++) {
-    drawKey(keys[i]);
+  updateKeys();
+  drawKeys(); 
+}
+
+function drawKeys() {
+  for (let key of keys) {
+    key.draw();
+  }
+}
+function updateKeys() {  
+  for (let key of keys) {
+    if (key.type === "black") {
+      if (key.update()) {
+        break;
+      }
+    }
+    key.update();
   }
 }
 
-function drawKey(type) {
-  if (type === "black") {
-    drawBlackKey();
-    translate(50,0);
-  }
-  else if (type === "white") {
-    drawWhiteKey();
-    translate(70,0);
-  }
+function playSound(note) {
+  userStartAudio();
+  monoSynth.play(note, 1  , 0, 0);
 }
 
-function drawWhiteKey() {
-  fill(255);
-  rect(0, 0, 70, 340);
-}
 
-function drawBlackKey() {
-  fill(0);
-  rect(0, 0, 50, 220);
+
+class pianoKey {
+
+  constructor(type, pos, pitch) {
+    this.type = type;
+    this.pos = pos;
+    if (type === "black") {
+      this.width = BLACKWIDTH;
+      this.height = 220;
+      this.colour = "black";
+      this.pitch = whiteNotes[4];
+      this.octave = 1;
+    }
+    else {
+      this.width = WHITEWIDTH;
+      this.height = 340;
+      this.colour = "white";
+      this.pitch = whiteNotes[pitch % 7];
+      this.octave = floor(pitch/7);
+      if (pitch % 7 >= 5 && pitch % 7 <= 6) {
+        this.octave += 1;
+      }
+    }
+  }
+
+  draw() {
+    push();
+    fill(this.colour);
+    rect(this.pos, 100, this.width, this.height);
+    pop();
+  }
+
+  update() {
+    if (mouseX > this.pos && mouseX < this.pos + this.width && mouseY > 100 && mouseY < 100 + this.height && mouseIsPressed) {
+      console.log(this.pitch, this.type, this.octave + 4);
+      playSound(this.pitch.concat(this.octave + 4));
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
 }
