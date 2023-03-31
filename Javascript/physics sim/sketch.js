@@ -1,25 +1,23 @@
 let multiplier = 2000;
 let buffer = 1100;
 
+let positive, negative;
 
 
 
-// function preload() {
-//   mamun = loadImage("mamun.jpg")
-// }
 
 
 function setup() {
   new Canvas(windowWidth, windowHeight);
 
   let floor = new Sprite(width/2,height , width, 5);
-  floor.collider = 's';
+  floor.collider = "s";
   floor = new Sprite(width/2,0, width, 5);
-  floor.collider = 's';
+  floor.collider = "s";
   let wall = new Sprite(0,height/2, 5,height);
-  wall.collider = 's';
+  wall.collider = "s";
   wall = new Sprite(width,height/2, 5,height);
-  wall.collider = 's';
+  wall.collider = "s";
   
 
   noStroke();
@@ -40,6 +38,7 @@ function setup() {
   ball.vel.y = 0;
   ball = new negative.Sprite(width/2, height/2); 
   ball.vel.y = 0;
+
 }
 
 

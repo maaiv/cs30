@@ -8,4 +8,5 @@
 
 ## Projects
 - [Physics Simulation](Javascript/physics%20sim)
+- [Physics Simulation](Javascript/physics%20sim%20v2)
 - [multi project](Javascript/multi/)
