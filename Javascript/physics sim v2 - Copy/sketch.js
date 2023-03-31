@@ -8,7 +8,7 @@
 let balls = [];
 
 let grid = [];
-let gridBoxSize = 20;
+let gridBoxSize = 100;
 let boundCenter;
 let boundRadius = 270;
 
@@ -25,25 +25,28 @@ function setup() {
 }
 
 function draw() {
-  if (frameCount % 2 === 0) {
-    balls.push(new particle(width/2 - 250,height/2));
+  if (frameCount % 1000000 === 1) {
+    balls.push(new particle(width/2 - 250,height/2, balls.length));
   }
   background(0);
 
 
   
-  // push();
-  // stroke("white");
-  // noFill();
+  push();
+  stroke("white");
+  noFill();
   
-  // for (let y = 0; y < height/gridBoxSize; y++) {
-  //   console.log("bruh");
-  //   for (let x = 0; x < width/gridBoxSize; x++) {
-  //     console.log("bruh");
-  //     rect(x * gridBoxSize, y * gridBoxSize, gridBoxSize, gridBoxSize);
-  //   }
-  // }
-  // pop();
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      push();
+      if (x === floor(grid[y].length - 1)) {
+        stroke("orange");
+      }
+      rect(x * gridBoxSize, y * gridBoxSize, gridBoxSize, gridBoxSize);
+      pop();
+    }
+  }
+  pop();
 
 
   push();
@@ -73,7 +76,7 @@ function draw() {
 
 
 class particle {
-  constructor(xCor, yCor) {
+  constructor(xCor, yCor, i) {
     this.pos = createVector(xCor, yCor);
     this.oldpos = createVector(xCor-2, yCor);
 
@@ -84,6 +87,8 @@ class particle {
     this.colour = "grey";
     this.mass = 1;
     this.acceleration = createVector(0, 0);
+    this.gridLocation = createVector(floor(this.x / gridBoxSize), floor(this.y / gridBoxSize));
+    this.index = i;
   }
 
 
@@ -105,6 +110,8 @@ class particle {
     this.accelerate(dt);
     this.constrain();
     this.collide();
+    this.gridLocation.set(floor(this.pos.x / gridBoxSize), floor(this.pos.y / gridBoxSize));
+    console.log(this.gridLocation.x, this.gridLocation.y);
   }
 
   accelerate(dt) {

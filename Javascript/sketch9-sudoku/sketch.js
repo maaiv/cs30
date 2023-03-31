@@ -46,6 +46,7 @@ function draw() {
   }
   background(200);
   displayGrid();
+  getPossibilities()
 }
 
 function displayGrid() {
@@ -60,9 +61,17 @@ function displayGrid() {
         text(String(grid[y][x]), x * cellSize, y * cellSize + cellSize/20,  cellSize,  cellSize);
         pop();
       }
-      
     }
   }
 }
 
+function getPossibilities(xPos, yPos, value) {
+  if (grid[yPos].includes(value)) {
+    return false;
+  }
+
+  else if (grid.map(x => x[xPos])) {
+    return false;
+  }
+}
 
