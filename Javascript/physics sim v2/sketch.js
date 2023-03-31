@@ -83,9 +83,9 @@ class particle {
     let distance = p5.Vector.sub(boundCenter, this.pos).limit(boundRadius - this.radius);
     this.pos.set(p5.Vector.sub(boundCenter, distance));
 
-    collide() {
-      this.pos
-    }
+    // collide() {
+    //   this.pos
+    // }
     
   }
   draw() {
