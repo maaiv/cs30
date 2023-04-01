@@ -25,7 +25,7 @@ function setup() {
 }
 
 function draw() {
-  if (frameCount % 2 === 0) {
+  if (balls.length<500 && frameCount % 2 === 0) {
     balls.push(new particle(width/2 - 250,height/2));
   }
   background(0);
