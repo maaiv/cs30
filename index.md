@@ -9,6 +9,6 @@
 ## Projects
 - [Physics Simulation](Javascript/physics%20sim)
 - [Physics Simulation v2](Javascript/physics%20sim%20v2)    
-- [Physics Simulation v2.5](Javascript/physics%20sim%20v2)
-- [Physics Simulation v2.6](Javascript/physics%20sim%20v2)
-- [multi project](Javascript/multi/)
+- [Physics Simulation v2.5](Javascript/physics%20sim%20v2.5)
+- [Physics Simulation v2.6](Javascript/physics%20sim%20v2.6)
+- [multi project](Javascript/multi/)    
