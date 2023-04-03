@@ -8,7 +8,7 @@
 let balls = [];
 
 let grid = [];
-let gridBoxSize = 100;
+let gridBoxSize = 10;
 let boundCenter;
 let boundRadius = 270;
 let xGrids, yGrids;
@@ -21,7 +21,6 @@ function setup() {
 
   xGrids = ceil(width/gridBoxSize);
   yGrids = ceil(height/gridBoxSize);
-  console.log(xGrids);
 
   for (let y = 0; y < yGrids; y++) {
     grid.push([]);
@@ -32,9 +31,10 @@ function setup() {
 }
 
 function draw() {
-  if (balls.length<500 && frameCount % 2 === 0) {
-    
-    balls.push(new particle(width/2 - 250,height/2 - 20, balls.length));
+  if (balls.length < 1600 && frameCount % 3 === 0) {
+    balls.push(new particle(width/2 - 50,height/2 - 30 - 200, balls.length));
+    balls.push(new particle(width/2 - 50,height/2 - 20 - 200, balls.length));
+
   }
   background(0);
 
@@ -67,10 +67,14 @@ function draw() {
   // circle(boundCenter.x, boundCenter.y, boundRadius * 2);
   pop();
 
-  let subdt = 4;
+  let subdt = 8;
   for (let i = 0; i < subdt; i++) {
     for (let ball of balls) {
+      ball.accelerate();
       ball.update(1/subdt);
+      ball.collide();
+      ball.constrain();
+      
       if (i === subdt - 1) {
         ball.draw();
       }
@@ -85,17 +89,17 @@ function draw() {
 class particle {
   constructor(xCor, yCor, i) {
     this.pos = createVector(xCor, yCor);
-    this.oldpos = createVector(xCor-2, yCor);
+    this.oldpos = createVector(xCor-0.5, yCor);
 
     this.friction = 0.99;
     this.groundFriction = 1;
-    this.gravity = createVector(0, 1);
-    this.radius = 6;
+    this.gravity = createVector(0, 0.2);
+    this.radius = 5;
     this.colour = "grey";
     this.mass = 1;
     this.acceleration = createVector(0, 0);
-    this.gridX = floor(this.pos.x / gridBoxSize);
-    this.gridY = floor(this.pos.y / gridBoxSize);
+    this.gridX = floor(this.pos.x / gridBoxSize) + 1;
+    this.gridY = floor(this.pos.y / gridBoxSize) + 1;
     
     this.index = i;
     grid[this.gridY][this.gridX].push(this.index);
@@ -111,7 +115,6 @@ class particle {
     this.acceleration.set(0,0);
 
     // this.gridLocation.set(floor(this.pos.x / gridBoxSize), floor(this.pos.y / gridBoxSize));
-    
 
     if (floor(this.pos.x / gridBoxSize) !== this.gridX || floor(this.pos.y / gridBoxSize) !== this.gridY) {
       let gridIndex = grid[this.gridY][this.gridX].indexOf(this.index);
@@ -120,13 +123,14 @@ class particle {
       
       this.gridX = floor(this.pos.x / gridBoxSize);
       this.gridY = floor(this.pos.y / gridBoxSize);
-
-      grid[this.gridY][this.gridX].push(this.index);
+      try {
+        grid[this.gridY][this.gridX].push(this.index);
+      }
+      catch(err) {
+        console.log(grid[this.gridY][this.gridX], this.gridX, this.gridY);
+      }
     }
 
-    this.accelerate(dt);
-    this.constrain();
-    this.collide();
 
   }
 
@@ -134,32 +138,31 @@ class particle {
     this.acceleration.add(this.gravity);
   }
   constrain() {
-    if (this.pos.x + this.radius > width) {
-      this.pos.x = width - this.radius;
+    // if (this.pos.x + this.radius > width - 20) {
+    //   this.pos.x = width - this.radius - 20;
 
-    }
-    if (this.pos.x - this.radius < 0) {
-      this.pos.x = this.radius;
+    // }
+    // if (this.pos.x - this.radius < 20) {
+    //   this.pos.x = this.radius + 20;
 
-    }
-    if (this.pos.y + this.radius > height) {
-      this.pos.y = height - this.radius;
+    // }
+    // if (this.pos.y + this.radius > height  - 20) {
+    //   this.pos.y = height - this.radius - 20;
 
-    }
-    if (this.pos.y - this.radius < 0) {
-      this.pos.y = this.radius;
+    // }
+    // if (this.pos.y - this.radius < 20) {
+    //   this.pos.y = this.radius + 20;
 
-    }
+    // }
     
-    // let distance = p5.Vector.sub(boundCenter, this.pos).limit(boundRadius - this.radius);
-    // this.pos.set(p5.Vector.sub(boundCenter, distance));
+    let distance = p5.Vector.sub(boundCenter, this.pos).limit(boundRadius - this.radius);
+    this.pos.set(p5.Vector.sub(boundCenter, distance));
 
   }
   collide() {
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
 
-
-    for (let dx = -1; dx < 1; dx++) {
-      for (let dy = -1; dy < 1; dy++) {
         for (let otherBallIndex of grid[constrain(this.gridY + dy, 0, yGrids - 1)][constrain(this.gridX + dx, 0, xGrids - 1)]) {
           let otherball = balls[otherBallIndex];
           if (otherball !== this) {

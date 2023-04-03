@@ -7,43 +7,32 @@
 
 let balls = [];
 
-let grid = [];
-let gridBoxSize = 20;
+
 let boundCenter;
 let boundRadius = 270;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
   boundCenter = createVector(width/2,height/2);
-  
-  for (let y = 0; y < height/gridBoxSize; y++) {
-    grid.push([]);
-    for (let x = 0; x < width/gridBoxSize; x++) {
-      grid[y].push([]);
-    }
-  }
+
 }
 
 function draw() {
-  if (balls.length<500 && frameCount % 2 === 0) {
-    balls.push(new particle(width/2 - 250,height/2));
+  if (balls.length < 1000 && frameCount % 2 === 0) {
+    balls.push(new particle(width/2 - 550,height/2 - 30 - 200));
+    balls.push(new particle(width/2 - 550,height/2 - 20 - 200));
+    balls.push(new particle(width/2 - 550,height/2 - 40 - 200));
+    balls.push(new particle(width/2 - 550,height/2 - 50 - 200));
   }
   background(0);
 
 
   
-  // push();
-  // stroke("white");
-  // noFill();
-  
-  // for (let y = 0; y < height/gridBoxSize; y++) {
-  //   console.log("bruh");
-  //   for (let x = 0; x < width/gridBoxSize; x++) {
-  //     console.log("bruh");
-  //     rect(x * gridBoxSize, y * gridBoxSize, gridBoxSize, gridBoxSize);
-  //   }
-  // }
-  // pop();
+  push();
+  stroke("white");
+  noFill();
+
+  pop();
 
 
   push();
@@ -80,7 +69,7 @@ class particle {
     // this.friction = 0.99;
     this.groundFriction = 1;
     this.gravity = createVector(0, 1);
-    this.radius = 6;
+    this.radius = 5;
     this.colour = "grey";
     this.mass = 1;
     this.acceleration = createVector(0, 0);
@@ -111,21 +100,21 @@ class particle {
     this.acceleration.add(this.gravity);
   }
   constrain() {
-    if (this.pos.x + this.radius > width) {
-      this.pos.x = width - this.radius;
-    }
-    if (this.pos.x - this.radius < 0) {
-      this.pos.x = this.radius;
-    }
-    if (this.pos.y + this.radius > height) {
-      this.pos.y = height - this.radius;
-    }
-    if (this.pos.y - this.radius < 0) {
-      this.pos.y = this.radius;
-    }
+    // if (this.pos.x + this.radius > width) {
+    //   this.pos.x = width - this.radius;
+    // }
+    // if (this.pos.x - this.radius < 0) {
+    //   this.pos.x = this.radius;
+    // }
+    // if (this.pos.y + this.radius > height) {
+    //   this.pos.y = height - this.radius;
+    // }
+    // if (this.pos.y - this.radius < 0) {
+    //   this.pos.y = this.radius;
+    // }
     
-    // let distance = p5.Vector.sub(boundCenter, this.pos).limit(boundRadius - this.radius);
-    // this.pos.set(p5.Vector.sub(boundCenter, distance));
+    let distance = p5.Vector.sub(boundCenter, this.pos).limit(boundRadius - this.radius);
+    this.pos.set(p5.Vector.sub(boundCenter, distance));
 
   }
   collide() {
