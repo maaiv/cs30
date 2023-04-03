@@ -38,10 +38,13 @@ function setup() {
       grid[y].push([]);
     }
   }
+
+
+
 }
 
 function draw() {
-  if (balls.length < 16 * 16 * 16 * 2 && frameCount % 2 === 0) {
+  if (balls.length < 6000 && frameCount % 2 === 0) {
     for (let i = 0; i < 8; i++) {
       balls.push(new particle(width/2 - 50,height/2 - 200 + i * 10, balls.length));
     }
@@ -67,6 +70,7 @@ function draw() {
 
   push();
   fill("white");
+  translate(600,0);
   text(str(round(frameRate())), 10, 10);
   text(str(round(balls.length)), 10, 20);
   pop();
@@ -106,7 +110,7 @@ function solveCollisons() {
   //   balls: balls,
   // });
 
-
+  let count = 1;
   for (let y = 0; y < yGrids; y++) {
     for (let x = 0; x < xGrids; x++) {
       for (let ballIndex of grid[y][x]) {
@@ -119,6 +123,7 @@ function solveCollisons() {
             for (let otherBallIndex of grid[constrain(y + dy, 0, yGrids - 1)][constrain(x + dx, 0, xGrids - 1)]) {
               let otherball = balls[otherBallIndex];
               if (otherball !== ball) {
+                count += 1;
                 if (ball.pos.dist(otherball.pos) < ball.radius * 2) {
                   let collisionAxis = p5.Vector.sub(ball.pos, otherball.pos);
                   let delta = ball.radius - collisionAxis.mag()/2;
@@ -135,6 +140,7 @@ function solveCollisons() {
       }
     }
   }
+  console.log(count);
 }
 
 class particle {
@@ -153,7 +159,7 @@ class particle {
     this.gridY = floor(this.pos.y / gridBoxSize) + 1;
     
     this.index = i;
-    grid[this.gridY][this.gridX].push(this.index);
+    // grid[this.gridY][this.gridX].push(this.index);
   }
 
 

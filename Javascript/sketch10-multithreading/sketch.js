@@ -9,15 +9,14 @@ let startTime, allPrimes = [];
 
 let multithreading = true;
 
-let workerTotal = 1;
-
+let workerTotal = 4;
 let busyWorkers = 0;
 
 let total = 50000000;
 
 let clock1 = 0;
 let clock2 = 0;
-let primes = []
+let primes = [];
 function setup() {
   
   createCanvas(windowWidth, windowHeight);
