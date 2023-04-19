@@ -9,7 +9,7 @@ let balls = [];
 
 
 let grid = [];
-let gridBoxSize = 5;
+let gridBoxSize = 30;
 let boundCenter;
 let boundRadius = 270;
 let xGrids, yGrids;
@@ -44,13 +44,14 @@ function setup() {
 }
 
 function draw() {
-  if (balls.length < 6000 && frameCount % 2 === 0) {
-    for (let i = 0; i < 8; i++) {
-      balls.push(new particle(width/2 - 50,height/2 - 200 + i * 10, balls.length));
-    }
 
+  if (mouseIsPressed && frameCount % 2 === 0) {
+    balls.push(new particle(mouseX, mouseY, balls.length));
   }
-  background(0);
+
+
+
+  background(200);
   
   // push();
   // stroke("white");
@@ -96,21 +97,13 @@ function draw() {
     }
 
   }
-    
 }
 
 
 
 function solveCollisons() {
 
-  // worker1.postMessage({
-  //   yGrids: yGrids,
-  //   xGrids: xGrids,
-  //   grid: grid,
-  //   balls: balls,
-  // });
 
-  let count = 1;
   for (let y = 0; y < yGrids; y++) {
     for (let x = 0; x < xGrids; x++) {
       for (let ballIndex of grid[y][x]) {
@@ -123,7 +116,6 @@ function solveCollisons() {
             for (let otherBallIndex of grid[constrain(y + dy, 0, yGrids - 1)][constrain(x + dx, 0, xGrids - 1)]) {
               let otherball = balls[otherBallIndex];
               if (otherball !== ball) {
-                count += 1;
                 if (ball.pos.dist(otherball.pos) < ball.radius * 2) {
                   let collisionAxis = p5.Vector.sub(ball.pos, otherball.pos);
                   let delta = ball.radius - collisionAxis.mag()/2;
@@ -140,19 +132,20 @@ function solveCollisons() {
       }
     }
   }
-  console.log(count);
 }
 
 class particle {
   constructor(xCor, yCor, i) {
     this.pos = createVector(xCor, yCor);
-    this.oldpos = createVector(xCor-1, yCor);
+    this.oldpos = createVector(xCor+random(-1,1), yCor+random(-1,1));
 
     this.friction = 0.99;
     this.groundFriction = 1;
-    this.gravity = createVector(0, 0.3);
-    this.radius = 2;
-    this.colour = "grey";
+    this.gravity = createVector(0, 0);
+    this.radius = 12;
+    this.r = random(255);
+    this.g = random(255);
+    this.b = random(255);
     this.mass = 1;
     this.acceleration = createVector(0, 0);
     this.gridX = floor(this.pos.x / gridBoxSize) + 1;
@@ -203,18 +196,23 @@ class particle {
   constrain() {
     if (this.pos.x + this.radius > width - 20) {
       this.pos.x = width - this.radius - 20;
+      this.oldpos.x = width - this.radius - 19.5;
+
 
     }
     if (this.pos.x - this.radius < 20) {
       this.pos.x = this.radius + 20;
+      this.oldpos.x = this.radius + 19.5;
 
     }
     if (this.pos.y + this.radius > height  - 20) {
       this.pos.y = height - this.radius - 20;
+      this.oldpos.y = height - this.radius - 19.5;
 
     }
     if (this.pos.y - this.radius < 20) {
       this.pos.y = this.radius + 20;
+      this.oldpos.y = this.radius + 19.5;
 
     }
     
@@ -222,26 +220,26 @@ class particle {
     // this.pos.set(p5.Vector.sub(boundCenter, distance));
 
   }
-  // collide() {
-  //   for (let dx = -1; dx <= 1; dx++) {
-  //     for (let dy = -1; dy <= 1; dy++) {
+  collide() {
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
 
-  //       for (let otherBallIndex of grid[constrain(this.gridY + dy, 0, yGrids - 1)][constrain(this.gridX + dx, 0, xGrids - 1)]) {
-  //         let otherball = balls[otherBallIndex];
-  //         if (otherball !== this) {
-  //           if (this.pos.dist(otherball.pos) < this.radius * 2) {
-  //             let collisionAxis = p5.Vector.sub(this.pos, otherball.pos);
-  //             let delta = this.radius - collisionAxis.mag()/2;
+        for (let otherBallIndex of grid[constrain(this.gridY + dy, 0, yGrids - 1)][constrain(this.gridX + dx, 0, xGrids - 1)]) {
+          let otherball = balls[otherBallIndex];
+          if (otherball !== this) {
+            if (this.pos.dist(otherball.pos) < this.radius * 2) {
+              let collisionAxis = p5.Vector.sub(this.pos, otherball.pos);
+              let delta = this.radius - collisionAxis.mag()/2;
               
-  //             this.pos.add(collisionAxis.setMag(delta));
-  //             otherball.pos.sub(collisionAxis.setMag(delta));
+              this.pos.add(collisionAxis.setMag(delta));
+              otherball.pos.sub(collisionAxis.setMag(delta));
     
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+            }
+          }
+        }
+      }
+    }
+  }
 
   applyFriction() {
     if (this.vel.magSq() > 0.000001) {
@@ -253,7 +251,10 @@ class particle {
   }
     
   draw() {
+    push();
+    fill(this.r, this.g, this.b);
     circle(this.pos.x, this.pos.y, this.radius * 2);
+    pop();
   }
 }
 
