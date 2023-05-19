@@ -7,7 +7,7 @@
 let renderer, ptLight, material, geometry, mappedmouseX, cube, scene, camera;
 
 
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
 
 function setup(){
 
@@ -41,19 +41,6 @@ function setup(){
   scene.add( ptLight );
     
 
-
-
-  // Piano Model hehe
-  const loader = new GLTFLoader();
-  loader.load("scene.gltf", function (gltf) {
-
-    scene.add( gltf.scene );
-  
-  }, undefined, function ( error ) {
-  
-    console.error( error );
-  
-  } );
 
 
   // Geometry

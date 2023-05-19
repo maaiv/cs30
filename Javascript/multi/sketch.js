@@ -35,19 +35,11 @@ let my, guests, shared, killSFX, cam, collideVisualCanvas, mrGuest;
 
 // Create environment objects
 let hostTerrain = [
-  {type: "box", x: 0, y: 50, z: 0, width: 3600, height: 100, length: 3600},
-  {type: "box", x: 300, y: -30, z: 0, width: 100, height: 60, length: 100}, 
-  {type: "box", x: 500, y: -110, z: 0, width: 100, height: 60, length: 100}, 
-  {type: "box", x: 300, y: -30, z: 400, width: 300, height: 60, length: 300},
-  {type: "box", x: -300, y: -30, z: -600, width: 800, height: 60, length: 800},
-  {type: "cylinder", x: -300, y: -30, z: 400, radius: 100, height: 60},
-  {type: "cylinder", x: 0, y: -350, z: 1500, radius: 200, height: 700},
-  {type: "cylinder", x: -700, y: -380, z: 1500, radius: 200, height: 760},
-  {type: "cylinder", x: -700 * 2, y: -410, z: 1500, radius: 200, height: 820}
+  {type: "box", x: 0, y: 50, z: 0, width: 100*100, height: 100, length: 100*100, rotation: 0},
+  {type: "box", x: 200, y: 0, z: 0, width: 10*10, height: 100, length: 10*10, rotation: 45},
+  {type: "polygon", x: -200, y: 0, z: 0, relativeVertices: [[0,0],[0,100],[100,100],[100,0]], height: 100, rotation: 180},
+  {type: "polygon", x: -200, y: 0, z: 0, relativeVertices: [[0,0],[0,100],[100,100],[100,0]], height: 100, rotation: 0}
 ];
-for (let i = 1; i < 10; i += 1) {
-  hostTerrain.push({type: "box", x: 500, y: -110 - i * 80, z: i * 200, width: 100, height: 60, length: 100});
-}
 
 
 // Connect to the server and shared data, and load sounds
@@ -57,7 +49,7 @@ function preload() {
   my = partyLoadMyShared();
   guests = partyLoadGuestShareds();
   shared = partyLoadShared("shared", {
-    ambientLevel: 0, 
+    ambientLevel: 100, 
     debugState: false, 
     terrain: hostTerrain, 
     lightSize: 10,
@@ -83,6 +75,7 @@ function setup() {
   // instantiate player object and hitbox visual
   my.player = new Crewmate(0,0,0,0,0);
   collideVisualCanvas = createGraphics(180,180);
+  collideVisualCanvas.angleMode(DEGREES);
 
 
   // log shared data
@@ -133,18 +126,33 @@ function collideVisual() {
     collideVisualCanvas.background(255);
     // draw environment hitboxes
     for (let terrainObject of shared.terrain) {
-      push();
+      collideVisualCanvas.push();
       if (terrainObject.type === "box") {
         let boxMiniX = (terrainObject.x - terrainObject.width/2)/10 + 90;
         let boxMiniZ = (terrainObject.z - terrainObject.length/2)/10 + 90;
-        collideVisualCanvas.rect(boxMiniX, boxMiniZ, terrainObject.width/10, terrainObject.length/10);
+        collideVisualCanvas.translate(boxMiniX, boxMiniZ);
+        collideVisualCanvas.rotate(terrainObject.rotation);
+        collideVisualCanvas.rect(0, 0, terrainObject.width/10, terrainObject.length/10);
       }
-      if (terrainObject.type === "cylinder") {
+      else if (terrainObject.type === "cylinder") {
         let cylinderMiniX = terrainObject.x/10 + 90;
         let cylinderMiniZ = terrainObject.z/10 + 90;
         collideVisualCanvas.circle(cylinderMiniX,cylinderMiniZ,terrainObject.radius/5);
       }
-      pop();
+      else if (terrainObject.type === "polygon") {
+        let polyMiniX = terrainObject.x/10 + 90;
+        let polyMiniZ = terrainObject.z/10 + 90;
+        collideVisualCanvas.translate(polyMiniX, polyMiniZ);
+        collideVisualCanvas.rotate(terrainObject.rotation);
+        collideVisualCanvas.beginShape();
+        for (let vert of terrainObject.relativeVertices) {
+          collideVisualCanvas.vertex(vert[0]/10, vert[1]/10);
+          
+        }
+        collideVisualCanvas.endShape(CLOSE);
+
+      }
+      collideVisualCanvas.pop();
     }
 
     // draw character hitboxes
@@ -253,6 +261,8 @@ function drawCrewMateModel(x,y,z,dir,h,hold,alive) {
   ambientMaterial(h, 255, 255);
   translate(x,y-36,z);
   rotateY(dir);
+  rotateX(x);
+  rotateZ(z);
   if (alive) {
     // draw main body
 
@@ -348,6 +358,7 @@ function drawEnvironment() {
     }
     translate(terrainObject.x,terrainObject.y,terrainObject.z);
     if (terrainObject.type === "box") {
+      rotateY(terrainObject.rotation);
       box(terrainObject.width,terrainObject.height,terrainObject.length);
     }
     else if (terrainObject.type === "cylinder") {
@@ -413,6 +424,9 @@ function findNormal(playerX,playerZ,playerDir,terrainObject) {
       terrainObject.width,
       terrainObject.length,
     );
+  }
+  else if (terrainObject.type === "polygon") {
+    1 + 1;
   }
   else if (terrainObject.type === "cylinder") {
     normalCollide = (x, z, dir, terrainObject) => collidePointCircle(

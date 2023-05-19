@@ -215,6 +215,7 @@ function drawBullets() {
       line(0, 0, 0, bullet.endx - bullet.startx, bullet.endy - bullet.starty, bullet.endz - bullet.startz);
       bullet.update();
       pop();
+        
     }
   }
 }
@@ -503,6 +504,8 @@ class Bullet {
 
   update() {
     this.life -= 1;
+
+
   }
 }
 
