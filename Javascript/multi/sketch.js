@@ -37,8 +37,7 @@ let my, guests, shared, killSFX, cam, collideVisualCanvas, mrGuest;
 let hostTerrain = [
   {type: "box", x: 0, y: 50, z: 0, width: 100*100, height: 100, length: 100*100, rotation: 0},
   {type: "box", x: 200, y: 0, z: 0, width: 10*10, height: 100, length: 10*10, rotation: 45},
-  {type: "polygon", x: -200, y: 0, z: 0, relativeVertices: [[0,0],[0,100],[100,100],[100,0]], height: 100, rotation: 180},
-  {type: "polygon", x: -200, y: 0, z: 0, relativeVertices: [[0,0],[0,100],[100,100],[100,0]], height: 100, rotation: 0}
+  {type: "polygon", x: -200, y: 50, z: 0, relativeVertices: [[0,0],[0,100],[100,100],[100,0]], height: 100, rotation: 90}
 ];
 
 
@@ -147,7 +146,6 @@ function collideVisual() {
         collideVisualCanvas.beginShape();
         for (let vert of terrainObject.relativeVertices) {
           collideVisualCanvas.vertex(vert[0]/10, vert[1]/10);
-          
         }
         collideVisualCanvas.endShape(CLOSE);
 
@@ -363,6 +361,21 @@ function drawEnvironment() {
     }
     else if (terrainObject.type === "cylinder") {
       cylinder(terrainObject.radius,terrainObject.height);
+    }
+    else if (terrainObject.type === "polygon") {
+      rotateY(terrainObject.rotation);
+      beginShape(TESS);
+      vertex(20, 20);
+      vertex(80, 20);
+      vertex(80, 40);
+      vertex(40, 40);
+      vertex(40, 60);
+      vertex(80, 60);
+      vertex(80, 80);
+      vertex(20, 80);
+      endShape(CLOSE);
+
+      // cylinder(terrainObject.radius,terrainObject.height);
     }
     pop();
   }
