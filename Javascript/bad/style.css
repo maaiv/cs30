@@ -1,0 +1,137 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #74ebd5, #acb6e5); /* Gradient background */
+  height: 100%; /* Ensure the background covers the full height */
+}
+
+canvas {
+  display: block;
+}
+
+label {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center vertically */
+    width: 120px; /* Adjust width for consistent alignment */
+    margin-bottom: 10px; /* Add spacing between labels */
+    font-family: Arial, sans-serif; /* Use a clean font */
+    font-size: 14px; /* Adjust font size */
+    color: #333; /* Text color */
+}
+
+/* Toggle switch styling */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 50px; /* Wider toggle */
+    height: 25px; /* Taller toggle */
+    background-color: #ccc;
+    border-radius: 15px; /* Fully rounded edges */
+    position: relative;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add subtle shadow */
+}
+
+input[type="checkbox"]:checked {
+    background-color: #4caf50; /* Green when checked */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Stronger shadow when active */
+}
+
+input[type="checkbox"]::before {
+    content: "";
+    width: 21px; /* Slightly smaller than the toggle height */
+    height: 21px;
+    background-color: white;
+    border-radius: 50%; /* Circular knob */
+    position: absolute;
+    top: 2px; /* Centered vertically */
+    left: 2px; /* Start position */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow to the knob */
+}
+
+input[type="checkbox"]:checked::before {
+    transform: translateX(25px); /* Move knob to the right */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Stronger shadow when active */
+}
+
+input[type="checkbox"]:hover {
+    background-color: #bbb; /* Slightly darker background on hover */
+}
+
+input[type="checkbox"]:checked:hover {
+    background-color: #45a049; /* Slightly darker green on hover */
+}
+
+/* Slider container styling */
+.slider-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 250px; /* Adjust container width */
+    padding: 15px; /* Add padding around the slider */
+    background: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+    margin: 20px auto; /* Center the container horizontally */
+}
+
+.slider-container label {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px; /* Space between label and slider */
+}
+
+/* Slider styling */
+input[type="range"] {
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none;
+    width: 200px; /* Adjust slider width */
+    height: 8px; /* Slider track height */
+    background: #ccc; /* Track color */
+    border-radius: 5px; /* Rounded track edges */
+    outline: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Remove default thumb styling */
+    appearance: none;
+    width: 20px; /* Thumb width */
+    height: 20px; /* Thumb height */
+    background: #4caf50; /* Thumb color */
+    border-radius: 50%; /* Circular thumb */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Add shadow to thumb */
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4caf50;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+
+input[type="range"]:hover {
+    background: #bbb; /* Slightly darker track on hover */
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: #45a049; /* Slightly darker thumb on hover */
+    transform: scale(1.1); /* Slightly enlarge thumb on hover */
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+    background: #45a049;
+    transform: scale(1.1);
+}
+
