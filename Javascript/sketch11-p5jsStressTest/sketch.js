@@ -9,7 +9,7 @@ let balls = [];
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 5000; i++) {
     balls.push(new ball(random(0, width), random(30, height)));
   }
 
@@ -40,6 +40,6 @@ class ball {
   }
 
   draw() {
-    line(this.x, this.y, this.x + 5, this.y + 5);
+    circle(this.x, this.y, 10);
   }
 }
