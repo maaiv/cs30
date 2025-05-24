@@ -21,6 +21,14 @@ let changeTimeSlider, changeTimeInput;
 
 let directionToggles = {}; // Object to store toggle states for directions
 
+let hitSound; // Sound to play when the bar hits the ground
+let volumeSlider; // Volume slider
+
+function preload() {
+
+    soundFormats('mp3', 'wav');
+    hitSound = loadSound('hit.mp3'); // Place your sound file in an 'assets' folder
+}
 function setup() {
     createCanvas(windowWidth, windowHeight);
     frameRate(90); // Set frame rate to 90
@@ -50,13 +58,28 @@ function setup() {
         changeTimeInput.value(changeTime.toFixed(1));
     });
 
+    
+    // Create volume slider
+    volumeSlider = createSlider(0, 1, 0.5, 0.01);
+    volumeSlider.addClass('volume-slider');
+    volumeSlider.position(width - 320, 70);
+    
+    // Optionally, add a label for the slider
+    let volumeLabel = createDiv('Volume');
+    volumeLabel.parent(document.body);
+    volumeLabel.addClass('volume-slider-container');
+    volumeLabel.style('position', 'absolute');
+    volumeLabel.style('left', (width - 320) + 'px');
+    volumeLabel.style('top', '50px');
+
     // Create toggle checkboxes for directions
     const directions = ["NW", "N", "NE", "SW", "S", "SE"];
     directions.forEach((dir, index) => {
         directionToggles[dir] = createCheckbox(dir, true); // Default all toggles to true
-        directionToggles[dir].position(width - 250 + (100 * (index >= 3)), 60 + ((index * 40) % 120) ); // Position checkboxes on the right
+        directionToggles[dir].position(width - 250 + (100 * (index >= 3)), 120 + ((index * 40) % 120) ); // Position checkboxes on the right
     });
 }
+
 
 function draw() {
     background(220);
@@ -75,9 +98,11 @@ function draw() {
         ballY += ballSpeed;
 
         if (ballY >= height - 175) { // Adjusted ground level to 100 pixels higher
+            if (hitSound && hitSound.isLoaded()) {
+                hitSound.play();
+            }
             lastHitTime = millis(); // Record the time of the last hit
             resetBall(); // Reset ball position after changeTime seconds
-            console.log(millis());
 
             // Filter directions based on toggles
             const directions = ["NW", "N", "NE", "SW", "S", "SE"].filter(dir => directionToggles[dir].checked());
@@ -109,11 +134,16 @@ else {
         }
     }
 
+    // Set sound volume based on slider
+    if (hitSound && hitSound.isLoaded()) {
+        hitSound.setVolume(volumeSlider.value());
+    }
+
     // Draw the arrow
     push();
     translate(width / 2, height / 2); // Move to center of canvas
     fill(255, 255, 255); // Light blue circle background
-    ellipse(0, 0, (2 / 3) * height + 50); // Circle background slightly larger than the arrow
+    ellipse(0, 0, (4 / 5) * height + 70); // Circle background slightly larger than the arrow
     // // Draw notches for the 6 directions
     // const notchRadius = (2 / 3) * height / 2 + 25; // Radius for notches
     // const directions = [PI + QUARTER_PI, PI / 2, PI - QUARTER_PI, -QUARTER_PI, -PI / 2, QUARTER_PI]; // Corrected angles for NW, N, NE, SW, S, SE
@@ -137,12 +167,13 @@ function resetBall() {
 }
 
 function drawArrow() {
-    stroke(0);
-    strokeWeight(8); // Thicker arrow shaft
-    fill(0);
-    const arrowLength = (2 / 3) * height; // Arrow length is 2/3 of canvas height
+    fadeTime = ((1+changeTime)*1000)
+    stroke(400*(millis() - lastHitTime)/fadeTime - 100);
+    fill(400*(millis() - lastHitTime)/fadeTime - 100);
+    strokeWeight(24-max((20*(millis() - lastHitTime)/fadeTime-5),0)); // Thicker arrow shaft
+    const arrowLength = (4 / 5) * height; // Arrow length is 2/3 of canvas height
     line(0, -arrowLength / 2, 0, arrowLength / 2); // Larger arrow shaft
-    triangle(-30, -arrowLength / 2+60, 30, -arrowLength / 2+60, 0, -arrowLength / 2); // Larger arrowhead
+    triangle(-60, -arrowLength / 2+120, 60, -arrowLength / 2+120, 0, -arrowLength / 2); // Larger arrowhead
 }
 
 function drawTube() {
